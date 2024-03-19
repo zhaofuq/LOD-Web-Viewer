@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>LetsGo Viewer</title>
+	<style>
+		* {
+			padding: 0;
+			margin: 0;
+		}
+
+		img {
+			display: block;
+			width: 100%;
+		}
+
+		a {
+			display: block;
+			text-decoration: none;
+		}
+
+		.top {
+			background: #3a85d0;
+			font-size: 28px;
+			padding: 50px 0;
+			text-align: center;
+			color: #fff;
+		}
+
+		h3 {
+			font-size: 20px;
+		}
+
+		.content {
+			width: 90%;
+			margin: 0 auto;
+		}
+
+		.content h2 {
+			margin: 40px 0;
+		}
+
+		.box {
+			overflow: hidden;
+		}
+
+		.card {
+			display: block;
+			float: left;
+			width: 25%;
+			margin-right: 30px;
+			margin-bottom: 30px;
+			border: 1px solid rgba(0, 0, 0, .125);
+			border-radius: 5px;
+			overflow: hidden;
+			cursor: pointer;
+			box-shadow: 0 .125rem .25rem rgba(0, 0, 0, .075);
+			color: #333;
+		}
+
+		.card:hover {
+			box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15)
+		}
+
+		.img-wrap {
+			width: 100%;
+			height: 230px;
+			overflow: hidden;
+		}
+
+		.bottom-msg {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			padding: 16px;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="top">
+		<h1>LetsGo Viewer</h1>
+		<h3>Large-Scale Garage Modeling and Rendering via LiDAR-Assisted Gaussian Primitives</h3>
+	</div>
+
+	<div class="content">
+		<h2>Real-Time Level-of-detail Viewer Demos</h2>
+		<div class="box">
+			<a href="scene1.html" class="card">
+				<div class="img-wrap">
+					<img src="./images/1.png" alt="">
+				</div>
+				<div class="bottom-msg">
+					<div class="name">scene1</div>
+					<div class="size">265Mb</div>
+				</div>
+			</a>
+			<a href="scene2.html" class="card">
+				<div class="img-wrap">
+					<img src="./images/2.png" alt="">
+				</div>
+				<div class="bottom-msg">
+					<div class="name">scene2</div>
+					<div class="size">3809Mb</div>
+				</div>
+			</a>
+		</div>
+	</div>
+</body>
+
+</html>
