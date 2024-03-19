@@ -800,7 +800,7 @@ function initGUI(resize) {
 			}
 		})
 
-	gui.add(settings, 'scalingBeta', 1, 16, 1).name('Scaling Modifier')
+	gui.add(settings, 'scalingBeta', 2, 8, 1).name('Scaling Modifier')
 		.onChange(async value => {
 			try {
 				stopReading = true;
@@ -1756,7 +1756,7 @@ const fetchSetFile = async (url) => {
 			progressBarDom.style.width = `${progress}%`;
 			progressTextDom.innerHTML = `Load Resources ${(dataSource.size * progress / 100).toFixed(2)}Mb`;
 			if (progress === 100) {
-				progressTextDom.innerText = `文件加载成功, 正在解析...`;
+				progressTextDom.innerText = `File Loaded Successfully, Parsing...`;
 			}
 		} else {
 			console.log('Download progress: Not computable');
