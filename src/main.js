@@ -2,8 +2,8 @@
 const settings = {
 	renderingMode: "Octree", // "Octree", "Gaussian"
 	renderResolution: 1.0,
-	maxGaussians: 3200000,
-	scalingBeta: 4,
+	maxGaussians: 2000000,
+	scalingBeta: 2,
 	bgColor: '#000000',
 	speed: 0.07,
 	fov: 47,
@@ -800,7 +800,7 @@ function initGUI(resize) {
 			}
 		})
 
-	gui.add(settings, 'scalingBeta', 1, 16, 1).name('Scaling Modifier')
+	gui.add(settings, 'scalingBeta', 1, 16, 1).name('scalingBeta')
 		.onChange(async value => {
 			try {
 				stopReading = true;
@@ -813,8 +813,11 @@ function initGUI(resize) {
 
 	// 创建一个包含说明文案的HTML元素
 	const description = document.createElement('div');
-	description.innerHTML = 'LOD Level: Controls the level of detail of the model. Higher values result in higher detail levels <br /><br /> Ext Gaussians: Controls the quantity of additional Gaussian data in the scene. Increasing this value adds detail and complexity to the scene, but may also increase loading times and performance overhead. Adjust based on scene complexity and device capabilities.';
-	description.style.fontSize = '10px';
+	description.innerHTML = ' Parameters:\
+	<br /> LOD Level: Controls the level-of-detail of 3DGS model. Higher values result in more details \
+	<br /><br /> Ext Gaussians: Controls the extra number of Gaussians when level > 4. Increasing this value adds detail and complexity to the scene, but may also increase loading times and performance overhead. Adjust based on scene complexity and device capabilities. \
+	<br /><br /> scalingBeta: Controls coef of the level decreasing from distance. Increasing this value will result in fast level decreasing from neaf to far';
+	description.style.fontSize = '12px';
 	description.style.color = '#fff';
 	description.style.padding = '8px';
 	description.style.opacity = 0.8;
