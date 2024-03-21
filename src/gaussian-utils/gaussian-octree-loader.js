@@ -44,13 +44,13 @@ export class NodeLoader {
 				buffer = new ArrayBuffer(0);
 				console.warn(`loaded node with 0 bytes: ${node.name}`);
 			} else {
-				let response = await fetch(urlOctree, {
+
+				let response = await fetch(octreeFileUrl, {
 					headers: {
 						'content-type': 'multipart/byteranges',
 						'Range': `bytes=${first}-${last}`,
 					},
 				});
-
 				buffer = await response.arrayBuffer();
 			}
 
@@ -346,7 +346,6 @@ export class OctreeLoader {
 	}
 
 	static async load(url, octreeFileUrl) {
-
 		let response = await fetch(url);
 		let metadata = await response.json();
 
@@ -393,7 +392,6 @@ export class OctreeLoader {
 		root.byteOffset = 0;
 
 		octree.root = root;
-
 		loader.load(root, octreeFileUrl);
 
 		let result = {

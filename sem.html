@@ -214,29 +214,24 @@
 		</div>
 	</div>
 	<canvas id="canvas"></canvas>
+	<script src="./src/public.js"></script>
 	<script>
+
 		var dataSource = {
-			size: 3809,
-			octreeUrl: './model/data2/octree.bin',//https://neudim.oss-cn-shanghai.aliyuncs.com/splat/data2/octree.bin
-			metaData: './model/data2/metadata.json',
-			defaultViewMatrix: [0.16032438460697776, -0.16251072783100956, 0.9711726700438837, -0,
-				-0.9816784162091168, -0.050620815819487915, 0.1593769749836984, 0,
-				0.025035209656680164, -0.9880078980404207, -0.17424876380366072, 0,
-				44.43477987017589, 18.59552805579352, -79.7767694080993, 0.9999999999999817]
+			name: 'Campus1',
+			size: 4147,
+			octreeUrl: isLocal ? './model/sem/octree.bin' : 'https://neudim.oss-cn-shanghai.aliyuncs.com/splat/sem/octree.bin',// 
+			metaData: './model/sem/metadata.json',
+			defaultViewMatrix: [-0.98314053197243, -0.0029321482489683003, 0.16945824529843467, 0, -0.17470896364120989, 0.030488678741704738, -0.9798995961281175, 0, 0.0026702402852754464, -1.0031365983504823, -0.029305884508546126, 0, 101.88600308684015, 184.5208222018683, 92.8224866614811, 0.9999999999999418]
 		}
-		var instructionsBtn = document.getElementById('instructions_title');
-		var flat = true
-		instructionsBtn.addEventListener('click', function () {
-			console.log(flat)
-			document.getElementById('instructions').style.opacity = flat ? 1 : 0
-			flat = !flat
-		});
+		let chunks;
 	</script>
 
 
 	<!-- Libraries -->
 	<script type="module" src="src/gl-matrix-min.js"></script>
 	<script src="src/lil-gui@0.18"></script>
+	<script src="src/localforage.min.js"></script>
 
 	<!-- Custom -->
 	<script type="module" src="src/gaussian-utils/DecoderWorker.js"></script>

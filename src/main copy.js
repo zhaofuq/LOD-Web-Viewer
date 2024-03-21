@@ -829,7 +829,7 @@ function initGUI(resize) {
 
 
 }
-const chunksData = [];
+
 async function main() {
 	let carousel = true;
 
@@ -1667,7 +1667,7 @@ async function loadScene() {
 	octreeGeometryLoader = octreeGeometry.loader
 	await new Promise((resolve) => setTimeout(resolve, 500));
 	// wait for the geometry to load
-	console.log('octreeGeometry', octreeGeometry)
+	console.log(octreeGeometry)
 	settings.renderingMode = "Octree";
 
 	const queue = [{ node: octreeGeometry.root, level: 0 }];
@@ -1675,6 +1675,7 @@ async function loadScene() {
 		const { node, level } = queue.shift();
 		// init only handle node with level <= 4
 		if (level <= 4) {
+
 			// Load and pre-process gaussian data from .bin file
 			await octreeGeometryLoader.load(node, octreeFileUrl);
 
@@ -1706,82 +1707,117 @@ async function loadScene() {
 }
 var progressTextDom = document.getElementById("progress-text");
 var progressBarDom = document.getElementById("progressBar");
-const chunkSize = 1024 * 1024 * 1024;//1G
+const chunkSize = 2 * 1024 * 1024 * 1024;//2G
 
-
+async function saveToLocalStorage(blob) {
+	console.log('blob.size', blob.size)
+	try {
+		if (blob.size > chunkSize) {
+			storeBlobInIndexedDB(blob);
+		}
+		else {
+			await localforage.setItem(dataSource.name, blob);
+		}
+		console.log('File saved to local storage successfully.');
+	} catch (error) {
+		console.error('Error saving file to local storage:', error);
+	}
+}
 const startLoadScene = (blob) => {
+	progressTextDom.innerHTML = ``;
 	octreeFileUrl = URL.createObjectURL(blob);
 	progressBarDom.style.width = `100%`;
 	loadScene()
 }
 async function getFileData() {
-	const localBlob = await localforage.getItem(`${dataSource.name}_0`);
+	const localBlob = await localforage.getItem(dataSource.name);
 	if (localBlob) {
-		const mergedBlob = await mergeChunks();
-		startLoadScene(mergedBlob)
+		startLoadScene(localBlob)
 	}
 	else {
-		let data = await fetchSetFile(dataSource.octreeUrl)
-		const mergedBlob = await mergeChunks(data);
-		startLoadScene(mergedBlob)
+		const localChunkBlob = await localforage.getItem(`${dataSource.name}_0`);
+		if (localChunkBlob) {
+			// 在需要时获取并合并
+			const mergedBlob = await mergeChunksFromIndexedDB();
+			console.log(mergedBlob.size)
+			startLoadScene(mergedBlob)
+		}
+		else {
+			fetchSetFile(dataSource.octreeUrl)
+		}
 	}
 }
-async function fetchSetFile(url) {
-	const totalSize = await getTotalSize(url);
-	const chunkCount = Math.ceil(totalSize / chunkSize);
-	let chunks = []
-
-	for (let i = 0; i < chunkCount; i++) {
-		const start = i * chunkSize;
-		const end = Math.min(totalSize, (i + 1) * chunkSize) - 1;
-
-		const xhr = new XMLHttpRequest();
-		xhr.open('GET', url);
-		xhr.setRequestHeader('Range', `bytes=${start}-${end}`);
-		xhr.responseType = 'arraybuffer';
-
-		const promise = new Promise((resolve, reject) => {
-			xhr.onload = async () => {
-				if (xhr.status === 206) {
-					let blob = new Blob([xhr.response]);
-					let url = URL.createObjectURL(blob);
-					// await storeChunkInIndexedDB(blob, i);
-					resolve(blob);
-				} else {
-					reject(new Error(`Failed to fetch chunk: ${xhr.statusText}`));
-				}
-			};
-			xhr.onerror = () => {
-				reject(new Error('Failed to fetch chunk: Network error'));
-			};
-		});
-		// 
-		xhr.addEventListener('progress', function (event) {
-			if (event.lengthComputable) {
-				const progress = Math.round((event.loaded / event.total) * 100);
-				progressBarDom.style.width = `${progress}%`;
-				progressTextDom.innerHTML = `Load Resources ${(dataSource.size * progress / 100).toFixed(2)}Mb`;
-				if (progress === 100) {
-					progressTextDom.innerText = `File Loaded Successfully, Parsing...`;
-				}
-			} else {
-				console.log('Download progress: Not computable');
-			}
-		});
-
-		xhr.send();
-		chunks.push(promise);
-	}
-
-	return Promise.all(chunks);
-}
-
-async function getTotalSize(url) {
+const fetchSetFile = async (url) => {
+	// 创建一个XMLHttpRequest对象
 	const xhr = new XMLHttpRequest();
-	xhr.open('HEAD', url);
+	xhr.setRequestHeader('Range', `bytes=${start}-${end}`);
+	// 监听加载事件
+	xhr.addEventListener('load', async function () {
+		if (xhr.status === 200) {
+			// 获取响应的二进制数据
+			const blob = new Blob([xhr.response]);
+			// 将Blob对象转换为临时文件地址
+			octreeFileUrl = URL.createObjectURL(blob);
+			loadScene()
+			// 使用临时文件地址进行操作，比如展示文件内容或者下载文件
+			// ...
+
+			// 当不再需要临时文件地址时，记得调用URL.revokeObjectURL()释放资源
+			// URL.revokeObjectURL(tempFileURL);
+			await saveToLocalStorage(blob);
+		} else {
+			console.error('Request failed with status:', xhr.status);
+		}
+	});
+
+	// 监听进度事件
+	xhr.addEventListener('progress', function (event) {
+		if (event.lengthComputable) {
+			const progress = Math.round((event.loaded / event.total) * 100);
+			progressBarDom.style.width = `${progress}%`;
+			progressTextDom.innerHTML = `Load Resources ${(dataSource.size * progress / 100).toFixed(2)}Mb`;
+			if (progress === 100) {
+				progressTextDom.innerText = `File Loaded Successfully, Parsing...`;
+			}
+		} else {
+			console.log('Download progress: Not computable');
+		}
+	});
+
+	// 发送GET请求
+	xhr.open('GET', url);
+	xhr.responseType = 'arraybuffer'; // 设置响应类型为二进制数组缓冲区
 	xhr.send();
-	await new Promise(resolve => xhr.onload = resolve);
-	return parseInt(xhr.getResponseHeader('Content-Length'));
+
+}
+
+async function fetchAndSaveFileAsTemp() {
+	let url = dataSource.octreeUrl;
+	// let url = './model/model.splat';
+	const response = await fetch(url);
+	if (!response.ok) {
+		throw new Error(`Failed to fetch file: ${response.statusText}`);
+	}
+	console.log('response', response);
+	// const blob = response.blob();
+	// console.log('blob', blob.size);
+	// octreeFileUrl = URL.createObjectURL(blob);
+	// loadScene();
+}
+
+
+
+
+
+// 分割Blob对象并存储到IndexedDB
+async function storeBlobInIndexedDB(blob) {
+	const chunks = Math.ceil(blob.size / chunkSize);
+	for (let i = 0; i < chunks; i++) {
+		const start = i * chunkSize;
+		const end = Math.min(start + chunkSize, blob.size);
+		const chunk = blob.slice(start, end);
+		await storeChunkInIndexedDB(chunk, i);
+	}
 }
 
 async function storeChunkInIndexedDB(chunk, index) {
@@ -1789,18 +1825,12 @@ async function storeChunkInIndexedDB(chunk, index) {
 	await localforage.setItem(dbName, chunk);
 }
 
-// 获取分片数据并合并
-async function mergeChunks(data) {
+// 从IndexedDB中获取分片数据并合并
+async function mergeChunksFromIndexedDB() {
 	const chunks = [];
 	let index = 0;
 	while (true) {
-		let chunk
-		if (data) {
-			chunk = data[index]
-		}
-		else {
-			chunk = await localforage.getItem(`${dataSource.name}_${index}`);
-		}
+		const chunk = await localforage.getItem(`${dataSource.name}_${index}`);
 		if (!chunk) break;
 		chunks.push(chunk);
 		index++;
@@ -1809,8 +1839,10 @@ async function mergeChunks(data) {
 	return blob;
 }
 
-getFileData()
-// fetchSetFile(dataSource.octreeUrl)
+
+// getFileData()
+fetchSetFile(dataSource.octreeUrl)
+// fetchAndSaveFileAsTemp()
 
 async function updateGaussianByView(viewMatrix, projectionMatrix, maxLevel, maxCount) {
 	const start = performance.now()
@@ -1912,7 +1944,6 @@ async function updateGaussianByView(viewMatrix, projectionMatrix, maxLevel, maxC
 	}
 
 	const loadTime = `${((performance.now() - start) / 1000).toFixed(3)}s`
-	progressTextDom.innerHTML = ``;
 	console.log(`[Loader] load ${gaussianSplats.extraVertexCount} gaussians in ${loadTime}.`)
 }
 // read gaussian data from octree node

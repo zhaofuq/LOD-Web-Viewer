@@ -216,15 +216,15 @@
 	<canvas id="canvas"></canvas>
 	<script src="./src/public.js"></script>
 	<script>
+
 		var dataSource = {
-			name: 'Campus(Croped)',
-			size: 265,
-			octreeUrl: isLocal ? './model/data1/octree.bin' : 'https://neudim.oss-cn-shanghai.aliyuncs.com/splat/octree.bin',
-			metaData: './model/data1/metadata.json',
-			defaultViewMatrix: [0.9927497990856815, -0.0714055560488, 0.06811081397812187, -0, -0.07796878081575105, -0.24508710594490188, 0.9620338765957253, 0, -0.0569737457403518, -0.9692292735703254, -0.253963791810392, 0, -29.019432370975778, 10.759393344881808, -23.47541959556413, 0.9999999999999801]
+			name: 'Campus2',
+			size: 2990,
+			octreeUrl: isLocal ? './model/sig/octree.bin' : 'https://neudim.oss-cn-shanghai.aliyuncs.com/splat/sig/octree.bin',// 
+			metaData: './model/sig/metadata.json',
+			defaultViewMatrix: [0.996809475426759, 0.01609223112574658, -0.03744208590653026, 0, 0.044729401909930834, -0.12504011239535337, 0.9869246429677724, 0, 0.006565822830339351, -0.9952524011360331, -0.12875771046296405, 0, -64.71289602198163, 53.15832046382663, -13.192126213994982, 0.9999999999999468]
 		}
 		let chunks;
-
 	</script>
 
 
@@ -232,7 +232,6 @@
 	<script type="module" src="src/gl-matrix-min.js"></script>
 	<script src="src/lil-gui@0.18"></script>
 	<script src="src/localforage.min.js"></script>
-
 
 	<!-- Custom -->
 	<script type="module" src="src/gaussian-utils/DecoderWorker.js"></script>

@@ -36,6 +36,7 @@
 		.content {
 			width: 90%;
 			margin: 0 auto;
+			padding-bottom: 30px;
 		}
 
 		.content h2 {
@@ -49,8 +50,8 @@
 		.card {
 			display: block;
 			float: left;
-			width: 25%;
-			margin-right: 30px;
+			width: 22%;
+			margin: 0 1%;
 			margin-bottom: 30px;
 			border: 1px solid rgba(0, 0, 0, .125);
 			border-radius: 5px;
@@ -64,6 +65,10 @@
 			box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15)
 		}
 
+		.name {
+			white-space: nowrap;
+		}
+
 		.img-wrap {
 			width: 100%;
 			height: 230px;
@@ -75,6 +80,22 @@
 			align-items: center;
 			justify-content: space-between;
 			padding: 16px;
+		}
+
+		@media screen and (min-width: 150px) and (max-width: 1023px) {
+			.top {
+				font-size: 18px;
+			}
+
+			h3 {
+				font-size: 14px;
+			}
+
+			.card {
+				width: 100%;
+				margin-right: 0;
+				margin-bottom: 20px;
+			}
 		}
 	</style>
 </head>
@@ -97,17 +118,61 @@
 					<div class="size">265MB</div>
 				</div>
 			</a>
-			<a href="scene2.html" class="card">
+			<a href="ikea.html" class="card">
 				<div class="img-wrap">
-					<img src="./images/2.png" alt="">
+					<img src="./images/ikea.png" alt="">
 				</div>
 				<div class="bottom-msg">
-					<div class="name">Campus</div>
-					<div class="size">3809MB</div>
+					<div class="name"> ShoppingMall 1</div>
+					<div class="size">1392MB</div>
 				</div>
 			</a>
+			<a href="gon.html" class="card">
+				<div class="img-wrap">
+					<img src="./images/gon.png" alt="">
+				</div>
+				<div class="bottom-msg">
+					<div class="name">ShoppingMall 2</div>
+					<div class="size">993MB</div>
+				</div>
+			</a>
+
+			<a href="sem.html" class="card">
+				<div class="img-wrap">
+					<img src="./images/sem.png" alt="">
+				</div>
+				<div class="bottom-msg">
+					<div class="name">Campus 1</div>
+					<div class="size">4147MB</div>
+				</div>
+			</a>
+			<a href="sig.html" class="card">
+				<div class="img-wrap">
+					<img src="./images/sig.png" alt="">
+				</div>
+				<div class="bottom-msg">
+					<div class="name">Campus 2</div>
+					<div class="size">2990MB</div>
+				</div>
+			</a>
+
+
 		</div>
 	</div>
+	<script>
+
+		function handleResize() {
+			var winWidth = window.innerWidth;
+			var cal = winWidth > 1023 ? 0.215 : 1;
+			var cards = document.querySelectorAll('.img-wrap');
+			for (var i = 0; i < cards.length; i++) {
+				cards[i].style.height = winWidth * 0.9 * cal + 'px'
+			}
+		}
+		handleResize()
+		window.addEventListener("resize", handleResize);
+
+	</script>
 </body>
 
 </html>
