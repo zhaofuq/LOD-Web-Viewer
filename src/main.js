@@ -13,6 +13,7 @@ const settings = {
 	sortTime: 'NaN',
 	fps: 0,
 }
+let activeKeys = [];
 
 let cameras = [
 	{
@@ -987,7 +988,7 @@ async function main() {
 		}
 	};
 
-	let activeKeys = [];
+
 
 	window.addEventListener("keydown", (e) => {
 		// if (document.activeElement != document.body) return;
@@ -1421,7 +1422,7 @@ async function main() {
 			start = Date.now() + 2000;
 		}
 		const progress = (100 * vertexCount) / (splatData.length / rowLength);
-		if (progress < 100) {
+		if (progress < 95) {
 			document.getElementById("progress").style.width = progress + "%";
 		} else {
 			document.getElementById("progress").style.display = "none";
