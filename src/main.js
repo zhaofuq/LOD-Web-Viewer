@@ -1402,7 +1402,7 @@ async function main() {
 			lastViewProj[10] / lastViewProjNorm * viewProj[10] / viewProjNorm;
 
 		if ((reloadLod || activeKeys.includes("ControlLeft")) && settings.renderingMode == "Octree" && Math.abs(dot - 1) > 0.01) {
-			console.log('reloading lod')
+			console.log(viewMatrix)
 			stopReading = true;
 			updateGaussianByView(viewMatrix, projectionMatrix, settings.lodLevel, settings.maxGaussians);
 			lastViewMatrix = viewMatrix;
