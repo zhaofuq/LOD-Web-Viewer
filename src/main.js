@@ -452,7 +452,6 @@ function createWorker(self) {
 				return;
 			}
 		} else {
-			generateTexture();
 			lastVertexCount = vertexCount;
 		}
 
@@ -489,6 +488,8 @@ function createWorker(self) {
 		const sortTime = `${((performance.now() - start) / 1000).toFixed(3)}s`
 
 		lastProj = viewProj;
+		
+		generateTexture();
 		self.postMessage({ depthIndex, viewProj, vertexCount, sortTime }, [
 			depthIndex.buffer,
 		]);
