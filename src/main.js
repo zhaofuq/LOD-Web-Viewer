@@ -12,6 +12,7 @@ const settings = {
 	debugDepth: false,
 	sortTime: 'NaN',
 	fps: 0,
+	shDegree: 0,
 }
 let activeKeys = [];
 
@@ -803,6 +804,16 @@ function initGUI(resize) {
 		})
 
 	gui.add(settings, 'scalingBeta', 1, 16, 1).name('scalingBeta')
+		.onChange(async value => {
+			try {
+				stopReading = true;
+				await updateGaussianByView(viewMatrix, projectionMatrix, settings.lodLevel, value)
+			} catch (error) {
+				throw error
+			}
+		})
+
+	gui.add(settings, 'shDegree', 0, 2, 1).name('SH Degree')
 		.onChange(async value => {
 			try {
 				stopReading = true;
@@ -1632,7 +1643,7 @@ async function loadOctreeGeometry(rootNode) {
 			rgbas[1] = (0.5 + SH_C0 * harmonic[1]) * 255;
 			rgbas[2] = (0.5 + SH_C0 * harmonic[2]) * 255;
 
-			// let color = computeColorFromSH(0, position, campos, harmonic)
+			// let color = computeColorFromSH(settings.shDegree, position, campos, harmonic)
 			// rgbas[0] = color.x * 255;
 			// rgbas[1] = color.y * 255;
 			// rgbas[2] = color.z * 255;
@@ -1968,7 +1979,7 @@ async function readGaussianFromNode(node, gaussianSplats, campos, level) {
 			rgbas[1] = (0.5 + SH_C0 * harmonic[1]) * 255;
 			rgbas[2] = (0.5 + SH_C0 * harmonic[2]) * 255;
 
-			// let color = computeColorFromSH(0, position, campos, harmonic)
+			// let color = computeColorFromSH(setting.shDegree, position, campos, harmonic)
 			// rgbas[0] = color.x * 255;
 			// rgbas[1] = color.y * 255;
 			// rgbas[2] = color.z * 255;
