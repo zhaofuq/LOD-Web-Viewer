@@ -1638,15 +1638,15 @@ async function loadOctreeGeometry(rootNode) {
 			scales[1] = scale[1];
 			scales[2] = scale[2];
 
-			const SH_C0 = 0.28209479177387814
-			rgbas[0] = (0.5 + SH_C0 * harmonic[0]) * 255;
-			rgbas[1] = (0.5 + SH_C0 * harmonic[1]) * 255;
-			rgbas[2] = (0.5 + SH_C0 * harmonic[2]) * 255;
+			// const SH_C0 = 0.28209479177387814
+			// rgbas[0] = (0.5 + SH_C0 * harmonic[0]) * 255;
+			// rgbas[1] = (0.5 + SH_C0 * harmonic[1]) * 255;
+			// rgbas[2] = (0.5 + SH_C0 * harmonic[2]) * 255;
 
-			// let color = computeColorFromSH(settings.shDegree, position, campos, harmonic)
-			// rgbas[0] = color.x * 255;
-			// rgbas[1] = color.y * 255;
-			// rgbas[2] = color.z * 255;
+			let color = computeColorFromSH(settings.shDegree, position, campos, harmonic)
+			rgbas[0] = color.x * 255;
+			rgbas[1] = color.y * 255;
+			rgbas[2] = color.z * 255;
 
 			// Activate alpha
 			rgbas[3] = sigmoid(opacity) * 255;
@@ -1974,15 +1974,15 @@ async function readGaussianFromNode(node, gaussianSplats, campos, level) {
 			scales[1] = scale[1];
 			scales[2] = scale[2];
 
-			const SH_C0 = 0.28209479177387814
-			rgbas[0] = (0.5 + SH_C0 * harmonic[0]) * 255;
-			rgbas[1] = (0.5 + SH_C0 * harmonic[1]) * 255;
-			rgbas[2] = (0.5 + SH_C0 * harmonic[2]) * 255;
+			// const SH_C0 = 0.28209479177387814
+			// rgbas[0] = (0.5 + SH_C0 * harmonic[0]) * 255;
+			// rgbas[1] = (0.5 + SH_C0 * harmonic[1]) * 255;
+			// rgbas[2] = (0.5 + SH_C0 * harmonic[2]) * 255;
 
-			// let color = computeColorFromSH(setting.shDegree, position, campos, harmonic)
-			// rgbas[0] = color.x * 255;
-			// rgbas[1] = color.y * 255;
-			// rgbas[2] = color.z * 255;
+			let color = computeColorFromSH(settings.shDegree, position, campos, harmonic)
+			rgbas[0] = color.x * 255;
+			rgbas[1] = color.y * 255;
+			rgbas[2] = color.z * 255;
 
 			// Activate alpha
 			const sigmoid = (m1) => 1 / (1 + Math.exp(-m1))
@@ -2106,4 +2106,5 @@ function computeColorFromSH(deg, position, campos, harmonic) {
 	result.z += 0.5;
 
 	return maxVec(result);
+	// return result;
 }
