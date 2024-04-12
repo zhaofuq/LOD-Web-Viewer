@@ -3,7 +3,7 @@ const settings = {
 	renderingMode: "Octree", // "Octree", "Gaussian"
 	renderResolution: 1.0,
 	maxGaussians: 2000000,
-	scalingBeta: 2,
+	scalingBeta: 1,
 	bgColor: '#000000',
 	speed: 0.07,
 	fov: 47,
@@ -628,6 +628,8 @@ function createWorker(self) {
 				rgba[0] = (0.5 + SH_C0 * attrs.f_dc_0) * 255;
 				rgba[1] = (0.5 + SH_C0 * attrs.f_dc_1) * 255;
 				rgba[2] = (0.5 + SH_C0 * attrs.f_dc_2) * 255;
+				// color = computeColorFromSH(settings.shDegree, position, campos, [attrs.f_dc_0, attrs.f_dc_1, attrs.f_dc_2, attrs.f_rest_0, attrs.f_rest_1, attrs.f_rest_2, attrs.f_rest_3, attrs.f_rest_4, attrs.f_rest_5, attrs.f_rest_6, attrs.f_rest_7, attrs.f_rest_8]);
+
 			} else {
 				rgba[0] = attrs.red;
 				rgba[1] = attrs.green;
@@ -1414,7 +1416,7 @@ async function main() {
 			lastViewProj[10] / lastViewProjNorm * viewProj[10] / viewProjNorm;
 
 		if ((reloadLod || activeKeys.includes("ControlLeft")) && settings.renderingMode == "Octree" && Math.abs(dot - 1) > 0.01) {
-			console.log(viewMatrix)
+			// console.log(viewMatrix)
 			stopReading = true;
 			updateGaussianByView(viewMatrix, projectionMatrix, settings.lodLevel, settings.maxGaussians);
 			lastViewMatrix = viewMatrix;
@@ -1550,13 +1552,22 @@ function nodeView(i, node) {
 	let position = [att.position.array[i * 3] + min.x,
 	att.position.array[i * 3 + 1] + min.y,
 	att.position.array[i * 3 + 2] + min.z]
-	// when sh = 0
+
 	let harmonic = [att.f_dc_0.array[i], att.f_dc_1.array[i], att.f_dc_2.array[i]]
 
-	// when sh = 2
-	// for (let j = 0; j <= 23; j++) {
-	//     harmonic.push(att[`f_rest_${j}`].array[i]);
-	// }
+	if (att['f_rest_0'] !== undefined) {
+		for (let j = 0; j <= 8; j++) {
+			harmonic.push(att[`f_rest_${j}`].array[i]);
+		}
+	}
+
+	if (att['f_rest_9'] !== undefined) {
+		for (let k = 9; k <= 9; k++) {
+			harmonic.push(att[`f_rest_${k}`].array[i]);
+		}
+	}
+
+	console.log(att.f_rest_12.array[i])
 	let opacity = att.opacity.array[i]
 	let scale = [att.scale_0.array[i], att.scale_1.array[i], att.scale_2.array[i]]
 	let rotation = [att.rot_0.array[i], att.rot_1.array[i], att.rot_2.array[i], att.rot_3.array[i]]
@@ -1999,7 +2010,7 @@ async function readGaussianFromNode(node, gaussianSplats, campos, level) {
 	for (let cid = 0; cid < 8; cid++) {
 		const child = node.children[cid];
 		if (child) {
-			await readGaussianFromNode(child, gaussianSplats, level + 1)
+			await readGaussianFromNode(child, gaussianSplats, campos, level + 1)
 		}
 	}
 }
@@ -2069,9 +2080,10 @@ function computeColorFromSH(deg, position, campos, harmonic) {
 		return { x: Math.max(vec.x, 0), y: Math.max(vec.y, 0), z: Math.max(vec.z, 0) };
 	}
 
-	let pos = { x: position[0], y: position[1], z: position[2] };;
-	let dir = { x: pos.x - campos[0], y: pos.y - campos[1], z: pos.z - campos[2] };
+	// let pos = { x: position[0], y: position[1], z: position[2] };
+	let dir = { x: position[0] - campos[0], y:position[1] - campos[1], z: position[2] - campos[2] };
 	dir = normalize(dir);
+	dir = { x: -dir.x, y: -dir.y, z: -dir.z };
 
 	let sh = harmonic;
 	let result = { x: SH_C0 * sh[0], y: SH_C0 * sh[1], z: SH_C0 * sh[2] };
@@ -2085,14 +2097,15 @@ function computeColorFromSH(deg, position, campos, harmonic) {
 			y: result.y - SH_C1 * y * sh[4] + SH_C1 * z * sh[7] - SH_C1 * x * sh[10],
 			z: result.z - SH_C1 * y * sh[5] + SH_C1 * z * sh[8] - SH_C1 * x * sh[11]
 		};
+		// console.log(position, sh, campos)
 
 		if (deg > 1) {
 			let xx = x * x, yy = y * y, zz = z * z;
 			let xy = x * y, yz = y * z, xz = x * z;
 			result = {
-				x: result.x + SH_C2[0] * xy * sh[12] + SH_C2[1] * yz * sh[15].x + SH_C2[2] * (2.0 * zz - xx - yy) * sh[18].x + SH_C2[3] * xz * sh[21].x + SH_C2[4] * (xx - yy) * sh[24].x,
-				y: result.y + SH_C2[0] * xy * sh[13] + SH_C2[1] * yz * sh[16].y + SH_C2[2] * (2.0 * zz - xx - yy) * sh[19].y + SH_C2[3] * xz * sh[22].y + SH_C2[4] * (xx - yy) * sh[25].y,
-				z: result.z + SH_C2[0] * xy * sh[14] + SH_C2[1] * yz * sh[17].z + SH_C2[2] * (2.0 * zz - xx - yy) * sh[20].z + SH_C2[3] * xz * sh[23].z + SH_C2[4] * (xx - yy) * sh[26].z
+				x: result.x + SH_C2[0] * xy * sh[12] + SH_C2[1] * yz * sh[15] + SH_C2[2] * (2.0 * zz - xx - yy) * sh[18] + SH_C2[3] * xz * sh[21] + SH_C2[4] * (xx - yy) * sh[24].x,
+				y: result.y + SH_C2[0] * xy * sh[13] + SH_C2[1] * yz * sh[16] + SH_C2[2] * (2.0 * zz - xx - yy) * sh[19] + SH_C2[3] * xz * sh[22] + SH_C2[4] * (xx - yy) * sh[25],
+				z: result.z + SH_C2[0] * xy * sh[14] + SH_C2[1] * yz * sh[17] + SH_C2[2] * (2.0 * zz - xx - yy) * sh[20] + SH_C2[3] * xz * sh[23] + SH_C2[4] * (xx - yy) * sh[26]
 			};
 
 			if (deg > 2) {
