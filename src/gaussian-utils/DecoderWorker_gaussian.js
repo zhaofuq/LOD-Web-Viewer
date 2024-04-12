@@ -159,7 +159,7 @@ onmessage = async function (event) {
 			}
 
 			attributeBuffers[pointAttribute.name] = { buffer: buff, attribute: pointAttribute };
-		}else if(/^(f_dc_\d|f_rest_\d|opacity|scale_\d|rot_\d)$/.test(pointAttribute.name)){ 
+		}else if(/^(f_dc_\d|f_rest_\d{1,2}|opacity|scale_\d|rot_\d)$/.test(pointAttribute.name)){ 
 			let buff = new ArrayBuffer(numPoints * 4);
 			let f32 = new Float32Array(buff);
 

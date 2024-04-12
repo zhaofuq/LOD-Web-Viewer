@@ -1555,22 +1555,47 @@ function nodeView(i, node) {
 
 	let harmonic = [att.f_dc_0.array[i], att.f_dc_1.array[i], att.f_dc_2.array[i]]
 
+	let opacity = att.opacity.array[i]
+	let scale = [att.scale_0.array[i], att.scale_1.array[i], att.scale_2.array[i]]
+	let rotation = [att.rot_0.array[i], att.rot_1.array[i], att.rot_2.array[i], att.rot_3.array[i]]
+
+	// read f_rest 
+	// let maxLoop = 32;
+	// while (true) {
+	// 	if (maxLoop-- < 0) {break;}
+	// 	for (let j = 0; j <= 23; j++) {
+	// 		if (att[`f_rest_${j}`] !== undefined && harmonic[j + 3] === undefined) {
+	// 			harmonic.push(att[`f_rest_${j}`].array[i]);
+	// 		}
+	// 	}
+	// 	if (harmonic.length === 27) {break;}
+	// }
+
+	let deg = 0
+	let sh = [att.f_dc_0.array[i], att.f_dc_1.array[i], att.f_dc_2.array[i]]
+
 	if (att['f_rest_0'] !== undefined) {
 		for (let j = 0; j <= 8; j++) {
 			harmonic.push(att[`f_rest_${j}`].array[i]);
 		}
+		deg = 1
 	}
 
 	if (att['f_rest_9'] !== undefined) {
-		for (let k = 9; k <= 9; k++) {
+		for (let k = 9; k <= 23; k++) {
 			harmonic.push(att[`f_rest_${k}`].array[i]);
 		}
+		deg = 2
+	}
+	// NOTE: resign the value, from GaussianView.cpp +D 2024.4.12
+	for (let j = 1; j < (deg + 1) * (deg + 1); j++) {
+		sh.push(harmonic[j - 1 + 3]);
+		sh.push(harmonic[j - 1 + (deg + 1) * (deg + 1) + 2]);
+		sh.push(harmonic[j - 1 + 2 * (deg + 1) * (deg + 1) + 1]);
 	}
 
-	console.log(att.f_rest_12.array[i])
-	let opacity = att.opacity.array[i]
-	let scale = [att.scale_0.array[i], att.scale_1.array[i], att.scale_2.array[i]]
-	let rotation = [att.rot_0.array[i], att.rot_1.array[i], att.rot_2.array[i], att.rot_3.array[i]]
+	harmonic = sh
+
 	return { position, harmonic, opacity, scale, rotation }
 }
 
@@ -2081,11 +2106,12 @@ function computeColorFromSH(deg, position, campos, harmonic) {
 	}
 
 	// let pos = { x: position[0], y: position[1], z: position[2] };
-	let dir = { x: position[0] - campos[0], y:position[1] - campos[1], z: position[2] - campos[2] };
+	let dir = { x: position[0] - campos[0], y: position[1] - campos[1], z: position[2] - campos[2] };
 	dir = normalize(dir);
-	dir = { x: -dir.x, y: -dir.y, z: -dir.z };
+	// dir = { x: -dir.x, y: -dir.y, z: -dir.z };
 
 	let sh = harmonic;
+
 	let result = { x: SH_C0 * sh[0], y: SH_C0 * sh[1], z: SH_C0 * sh[2] };
 
 	if (deg > 0) {
@@ -2097,13 +2123,13 @@ function computeColorFromSH(deg, position, campos, harmonic) {
 			y: result.y - SH_C1 * y * sh[4] + SH_C1 * z * sh[7] - SH_C1 * x * sh[10],
 			z: result.z - SH_C1 * y * sh[5] + SH_C1 * z * sh[8] - SH_C1 * x * sh[11]
 		};
-		// console.log(position, sh, campos)
+		// console.log(dir, sh)
 
 		if (deg > 1) {
 			let xx = x * x, yy = y * y, zz = z * z;
 			let xy = x * y, yz = y * z, xz = x * z;
 			result = {
-				x: result.x + SH_C2[0] * xy * sh[12] + SH_C2[1] * yz * sh[15] + SH_C2[2] * (2.0 * zz - xx - yy) * sh[18] + SH_C2[3] * xz * sh[21] + SH_C2[4] * (xx - yy) * sh[24].x,
+				x: result.x + SH_C2[0] * xy * sh[12] + SH_C2[1] * yz * sh[15] + SH_C2[2] * (2.0 * zz - xx - yy) * sh[18] + SH_C2[3] * xz * sh[21] + SH_C2[4] * (xx - yy) * sh[24],
 				y: result.y + SH_C2[0] * xy * sh[13] + SH_C2[1] * yz * sh[16] + SH_C2[2] * (2.0 * zz - xx - yy) * sh[19] + SH_C2[3] * xz * sh[22] + SH_C2[4] * (xx - yy) * sh[25],
 				z: result.z + SH_C2[0] * xy * sh[14] + SH_C2[1] * yz * sh[17] + SH_C2[2] * (2.0 * zz - xx - yy) * sh[20] + SH_C2[3] * xz * sh[23] + SH_C2[4] * (xx - yy) * sh[26]
 			};
