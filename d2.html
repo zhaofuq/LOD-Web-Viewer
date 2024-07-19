@@ -131,7 +131,7 @@
 			left: 20px;
 			bottom: 80px;
 			transition: all 0.2s ease-in-out;
-			display: none;
+			opacity: 0;
 			z-index: 9998;
 		}
 
@@ -211,23 +211,22 @@
 	<script src="./src/public.js"></script>
 	<script>
 		var dataSource = {
-			name: 'ikea',
-			size: 4500,
-			octreeUrl: './model/IKEA/octree.bin' ,
-			metaData: './model/IKEA/metadata.json',
-			baseLODLevel: 4,
-			maxLODLevel: 7,
+			name: 'd2',
+			size: 170,
+			octreeUrl: './model/d2/octree.bin' ,
+			metaData: './model/d2/metadata.json',
+			baseLODLevel: 0,
+			maxLODLevel: 0,
 			initLoadTime: 5000,
 
-			defaultViewMatrix:[0.9971778641277294, -0.0008238595704794971, 0.07507082355578719, -0, -0.0746642332784816, -0.1153848008478178, 0.9905107773276504, 0, 0.007845990241916814, -0.9933205268132507, -0.11512068210537642, 0, 32.421191640028425, -10.800353100613576, 47.78086485404852, 1.0000000000006066],
+			defaultViewMatrix:  [-0.24198633300365532, 0.39004147084325247, -0.8884313511250638, 0, -0.06795635775734975, 0.9065831101812413, 0.4165201048860752, -0, 0.9678969718310647, 0.16116673154359437, -0.19287492466300862, 0, 1.0846081475924596, 0.31781810673707317, 2.6392584296137396, 1.000000000000369],
 		   
-			trajectory: './model/original/output.json',
+			trajectory: './model/d2/demo.json',
 		   
 		}
 
 		var dataParameter = {
 			n: 1.3,
-			depthMax: 100
 		}
 		let chunks;
 

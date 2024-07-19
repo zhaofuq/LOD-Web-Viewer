@@ -211,23 +211,22 @@
 	<script src="./src/public.js"></script>
 	<script>
 		var dataSource = {
-			name: 'ikea',
-			size: 4500,
-			octreeUrl: './model/IKEA/octree.bin' ,
-			metaData: './model/IKEA/metadata.json',
+			name: 'comp_sem_2',
+			size: 1000,
+			octreeUrl: './model/comp/sem_2/octree.bin' ,
+			metaData: './model/comp/sem_2/metadata.json',
 			baseLODLevel: 4,
-			maxLODLevel: 7,
-			initLoadTime: 5000,
+			maxLODLevel: 6,
+			initLoadTime: 1000,
 
-			defaultViewMatrix:[0.9971778641277294, -0.0008238595704794971, 0.07507082355578719, -0, -0.0746642332784816, -0.1153848008478178, 0.9905107773276504, 0, 0.007845990241916814, -0.9933205268132507, -0.11512068210537642, 0, 32.421191640028425, -10.800353100613576, 47.78086485404852, 1.0000000000006066],
+			defaultViewMatrix:[0.8602006568284677, 0.008539331127210482, 0.5098842121657049, -0, -0.5096143592634894, -0.02218320953099741, 0.860116916498742, 0, 0.01865569147311921, -0.9997174526028895, -0.01473024564819684, 0, 10.491801096842314, 0.7959600936825039, -53.60083093024965, 1.0000000000001419],
 		   
-			trajectory: './model/original/output.json',
+			trajectory: './model/comp/sem_2/demo.json',
 		   
 		}
 
 		var dataParameter = {
 			n: 1.3,
-			depthMax: 100
 		}
 		let chunks;
 

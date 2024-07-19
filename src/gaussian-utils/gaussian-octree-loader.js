@@ -21,6 +21,7 @@ export class NodeLoader {
 			return;
 		}
 
+
 		node.loading = true;
 		potree.numNodesLoading++;
 
@@ -31,7 +32,7 @@ export class NodeLoader {
 
 			let { byteOffset, byteSize } = node;
 
-
+			// console.log(`loading ${node.name} ${byteOffset} ${byteSize}`)
 			// let urlOctree = `${this.url}/../octree.bin`;
 			let urlOctree = octreeFileUrl;
 
@@ -42,7 +43,7 @@ export class NodeLoader {
 
 			if (byteSize === 0n) {
 				buffer = new ArrayBuffer(0);
-				console.warn(`loaded node with 0 bytes: ${node.name}`);
+				// console.warn(`loaded node with 0 bytes: ${node.name}`);
 			} else {
 
 				let response = await fetch(octreeFileUrl, {
@@ -120,6 +121,8 @@ export class NodeLoader {
 			let max = min.clone().add(size);
 			let numPoints = node.numPoints;
 
+			// console.log(box, min, max)
+
 			let offset = node.octreeGeometry.loader.offset;
 
 			let message = {
@@ -146,7 +149,7 @@ export class NodeLoader {
 		}
 	}
 
-	parseHierarchy(node, buffer) {
+	 parseHierarchy(node, buffer) {
 
 		let view = new DataView(buffer);
 		let tStart = performance.now();
@@ -169,6 +172,7 @@ export class NodeLoader {
 			let byteOffset = view.getBigInt64(i * bytesPerNode + 6, true);
 			let byteSize = view.getBigInt64(i * bytesPerNode + 14, true);
 
+			// console.log(current.name, type, childMask, numPoints, byteOffset, byteSize);
 			if (current.nodeType === 2) {
 				// replace proxy with real node
 				current.byteOffset = byteOffset;
@@ -230,6 +234,7 @@ export class NodeLoader {
 
 		let { hierarchyByteOffset, hierarchyByteSize } = node;
 		let hierarchyPath = `${this.url}/../hierarchy.bin`;
+		// console.log(`loading ${hierarchyPath}`)
 
 		let first = hierarchyByteOffset;
 		let last = first + hierarchyByteSize - 1n;
@@ -369,7 +374,8 @@ export class OctreeLoader {
 		let max = new THREE.Vector3(...metadata.boundingBox.max);
 		let boundingBox = new THREE.Box3(min, max);
 
-		let offset = min.clone();
+		// let offset = min.clone();
+		let offset = new THREE.Vector3(...metadata.offset);
 		boundingBox.min.sub(offset);
 		boundingBox.max.sub(offset);
 
@@ -379,7 +385,7 @@ export class OctreeLoader {
 		octree.boundingSphere = boundingBox.getBoundingSphere(new THREE.Sphere());
 		octree.tightBoundingSphere = boundingBox.getBoundingSphere(new THREE.Sphere());
 		octree.offset = offset;
-		octree.pointAttributes = OctreeLoader.parseAttributes(metadata.attributes);
+		octree.pointAttributes = attributes;
 		octree.loader = loader;
 
 		let root = new OctreeGeometryNode("r", octree, boundingBox);

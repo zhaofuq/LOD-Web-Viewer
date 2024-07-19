@@ -131,7 +131,7 @@
 			left: 20px;
 			bottom: 80px;
 			transition: all 0.2s ease-in-out;
-			opacity: 0;
+			display: none;
 			z-index: 9998;
 		}
 
@@ -165,11 +165,10 @@
 				<div id="instructions">
 					- W/S arrow keys to move forward/back
 					- A/D arrow keys to move left/right
-					- space to jump
+					- space to play the video (if available)
 
 					camera angle (wasd)
 					- q/e to roll camera counterclockwise/clockwise
-					- i/k and j/l to orbit
 
 					trackpad
 					- scroll up/down/left/right to orbit
@@ -187,13 +186,8 @@
 					- two finger rotate to rotate camera clockwise/counterclockwise
 					- two finger pan to move side-to-side and up-down
 
-					gamepad
-					- if you have a game controller connected it should work
-
 					other
-					- press 0-9 to switch to one of the pre-loaded camera views
 					- press p to resume default animation
-					- drag and drop .ply file to convert to .splat
 				</div>
 			</h4>
 
@@ -217,11 +211,22 @@
 	<script src="./src/public.js"></script>
 	<script>
 		var dataSource = {
-			name: 'Campus(Croped)',
-			size: 265,
-			octreeUrl: isLocal ? './model/data1/octree.bin' : 'https://neudim.oss-cn-shanghai.aliyuncs.com/splat/octree.bin',
-			metaData: './model/data1/metadata.json',
-			defaultViewMatrix: [0.9927497990856815, -0.0714055560488, 0.06811081397812187, -0, -0.07796878081575105, -0.24508710594490188, 0.9620338765957253, 0, -0.0569737457403518, -0.9692292735703254, -0.253963791810392, 0, -29.019432370975778, 10.759393344881808, -23.47541959556413, 0.9999999999999801]
+			name: 'big',
+			size: 4300,
+			octreeUrl: './model/big/octree.bin' ,
+			metaData: './model/big/metadata.json',
+			baseLODLevel: 4,
+			maxLODLevel: 6,
+			initLoadTime: 10000,
+
+			defaultViewMatrix:[0.175304363153031, -0.06822605076941614, -0.9821474361091933, 0, 0.9841209947801192, -0.01605143750232311, 0.1767716577595904, -0, -0.027825310285673505, -0.9975407547316445, 0.06432880192408737, 0, 5.271327973149926, -3.9360326147709497, -84.36656355686074, 1.0000000000001834],
+		   
+			trajectory: './model/original/output.json',
+		   
+		}
+
+		var dataParameter = {
+			n: 1.3,
 		}
 		let chunks;
 

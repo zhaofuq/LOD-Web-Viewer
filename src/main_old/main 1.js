@@ -1,84 +1,192 @@
-// Description: Main file for the project
+
 const settings = {
 	renderingMode: "Octree", // "Octree", "Gaussian"
 	renderResolution: 1.0,
 	maxGaussians: 2000000,
-	// scalingBeta: 2,
+	scalingBeta: 2,
 	bgColor: '#000000',
 	speed: 0.07,
-	lodLevel: dataSource.baseLODLevel,
-	baseLevel: dataSource.baseLODLevel,
-	maxLevel: dataSource.maxLODLevel,
+	fov: 47,
+	lodLevel: 4,
 	en_frustum_culling: false,
 	debugDepth: false,
 	sortTime: 'NaN',
 	fps: 0,
 	shDegree: 0,
-	testingMode: false,
-	fov: 90,
-	fx: 367, // for testing
-	fy: 367, // for testing
-	poseId: 0,
-	depthMax: 100, // for testing
-}
-if (dataParameter.depthMax) {
-	settings.depthMax = dataParameter.depthMax;
 }
 let activeKeys = [];
-const baseLevelQueue = [];
 
-// get cameras from trajectory json
-async function fetchCameras() {
-    const response = await fetch(dataSource.trajectory);
-    const data = await response.json();
+let cameras = [
+	{
+		id: 0,
+		img_name: "00001",
+		width: 1959,
+		height: 1090,
+		position: [
+			-3.0089893469241797, -0.11086489695181866, -3.7527640949141428,
+		],
+		rotation: [
+			[0.876134201218856, 0.06925962026449776, 0.47706599800804744],
+			[-0.04747421839895102, 0.9972110940209488, -0.057586739349882114],
+			[-0.4797239414934443, 0.027805376500959853, 0.8769787916452908],
+		],
+		fy: 1164.6601287484507,
+		fx: 1159.5880733038064,
+	},
+	{
+		id: 1,
+		img_name: "00009",
+		width: 1959,
+		height: 1090,
+		position: [
+			-2.5199776022057296, -0.09704735754873686, -3.6247725540304545,
+		],
+		rotation: [
+			[0.9982731285632193, -0.011928707708098955, -0.05751927260507243],
+			[0.0065061360949636325, 0.9955928229282383, -0.09355533724430458],
+			[0.058381769258182864, 0.09301955098900708, 0.9939511719154457],
+		],
+		fy: 1164.6601287484507,
+		fx: 1159.5880733038064,
+	},
+	{
+		id: 2,
+		img_name: "00017",
+		width: 1959,
+		height: 1090,
+		position: [
+			-0.7737533667465242, -0.3364271945329695, -2.9358969417573753,
+		],
+		rotation: [
+			[0.9998813418672372, 0.013742375651625236, -0.0069605529394208224],
+			[-0.014268370388586709, 0.996512943252834, -0.08220929105659476],
+			[0.00580653013657589, 0.08229885200307129, 0.9965907801935302],
+		],
+		fy: 1164.6601287484507,
+		fx: 1159.5880733038064,
+	},
+	{
+		id: 3,
+		img_name: "00025",
+		width: 1959,
+		height: 1090,
+		position: [
+			1.2198221749590001, -0.2196687861401182, -2.3183162007028453,
+		],
+		rotation: [
+			[0.9208648867765482, 0.0012010625395201253, 0.389880004297208],
+			[-0.06298204172269357, 0.987319521752825, 0.14571693239364383],
+			[-0.3847611242348369, -0.1587410451475895, 0.9092635249821667],
+		],
+		fy: 1164.6601287484507,
+		fx: 1159.5880733038064,
+	},
+	{
+		id: 4,
+		img_name: "00033",
+		width: 1959,
+		height: 1090,
+		position: [
+			1.742387858893817, -0.13848225198886954, -2.0566370113193146,
+		],
+		rotation: [
+			[0.24669889292141334, -0.08370189346592856, -0.9654706879349405],
+			[0.11343747891376445, 0.9919082664242816, -0.05700815184573074],
+			[0.9624300466054861, -0.09545671285663988, 0.2541976029815521],
+		],
+		fy: 1164.6601287484507,
+		fx: 1159.5880733038064,
+	},
+	{
+		id: 5,
+		img_name: "00041",
+		width: 1959,
+		height: 1090,
+		position: [
+			3.6567309419223935, -0.16470990600750707, -1.3458085590422042,
+		],
+		rotation: [
+			[0.2341293058324528, -0.02968330457755884, -0.9717522161434825],
+			[0.10270823606832301, 0.99469554638321, -0.005638106875665722],
+			[0.9667649592295676, -0.09848690996657204, 0.2359360976431732],
+		],
+		fy: 1164.6601287484507,
+		fx: 1159.5880733038064,
+	},
+	{
+		id: 6,
+		img_name: "00049",
+		width: 1959,
+		height: 1090,
+		position: [
+			3.9013554243203497, -0.2597500978038105, -0.8106154188297828,
+		],
+		rotation: [
+			[0.6717235545638952, -0.015718162115524837, -0.7406351366386528],
+			[0.055627354673906296, 0.9980224478387622, 0.029270992841185218],
+			[0.7387104058127439, -0.060861588786650656, 0.6712695459756353],
+		],
+		fy: 1164.6601287484507,
+		fx: 1159.5880733038064,
+	},
+	{
+		id: 7,
+		img_name: "00057",
+		width: 1959,
+		height: 1090,
+		position: [4.742994605467533, -0.05591660945412069, 0.9500365976084458],
+		rotation: [
+			[-0.17042655709210375, 0.01207080756938, -0.9852964448542146],
+			[0.1165090336695526, 0.9931575292530063, -0.00798543433078162],
+			[0.9784581921120181, -0.1161568667478904, -0.1706667764862097],
+		],
+		fy: 1164.6601287484507,
+		fx: 1159.5880733038064,
+	},
+	{
+		id: 8,
+		img_name: "00065",
+		width: 1959,
+		height: 1090,
+		position: [4.34676307626522, 0.08168160516967145, 1.0876221470355405],
+		rotation: [
+			[-0.003575447631888379, -0.044792503246552894, -0.9989899137764799],
+			[0.10770152645126597, 0.9931680875192705, -0.04491693593046672],
+			[0.9941768441149182, -0.10775333677534978, 0.0012732004866391048],
+		],
+		fy: 1164.6601287484507,
+		fx: 1159.5880733038064,
+	},
+	{
+		id: 9,
+		img_name: "00073",
+		width: 1959,
+		height: 1090,
+		position: [3.264984351114202, 0.078974937336732, 1.0117200284114904],
+		rotation: [
+			[-0.026919994628162257, -0.1565891128261527, -0.9872968974090509],
+			[0.08444552208239385, 0.983768234577625, -0.1583319754069128],
+			[0.9960643893290491, -0.0876350978794554, -0.013259786205163005],
+		],
+		fy: 1164.6601287484507,
+		fx: 1159.5880733038064,
+	},
+];
 
-    return data.map(item => ({
-        id: item.id,
-        img_name: item.img_name,
-        width: item.width,
-        height: item.height,
-        viewMatrix: item.viewMatrix,
-        fy: item.fy,
-        fx: item.fx,
-    }));
-}
-
-let cameras;
-
-fetchCameras().then(fetchedCameras => {
-    cameras = fetchedCameras;
-});
-
+let camera = cameras[0];
 let reloadLod = false;
-let update_count = 0;
-// let default_status = false;
 
 const startReloadLod = () => {
-	const tempid = setTimeout(() => {
+	setTimeout(() => {
 		if (!reloadLod) {
-			reloadLod = true;
+			reloadLod = true
 		}
-		update_count = 0;
-		// default_status = false;
-
-		clearTimeout(tempid);
+		setTimeout(() => {
+			reloadLod = false;
+		}, 1000);
 	}, 10);
 
-
 };
-
-// let reloadDefault = false;
-
-// const startReloadDefault = () => {
-// 	const tempid = setTimeout(() => {
-// 		if (!reloadDefault && !default_status) {
-// 			reloadDefault = true;
-// 			default_status = true;
-// 		}
-
-// 		clearTimeout(tempid);
-// 	}, 10);
-// };
 
 function getProjectionMatrix(fx, fy, width, height) {
 	const znear = 0.2;
@@ -89,6 +197,23 @@ function getProjectionMatrix(fx, fy, width, height) {
 		[0, 0, zfar / (zfar - znear), 1],
 		[0, 0, -(zfar * znear) / (zfar - znear), 0],
 	].flat();
+}
+
+function getViewMatrix(camera) {
+	const R = camera.rotation.flat();
+	const t = camera.position;
+	const camToWorld = [
+		[R[0], R[1], R[2], 0],
+		[R[3], R[4], R[5], 0],
+		[R[6], R[7], R[8], 0],
+		[
+			-t[0] * R[0] - t[1] * R[3] - t[2] * R[6],
+			-t[0] * R[1] - t[1] * R[4] - t[2] * R[7],
+			-t[0] * R[2] - t[1] * R[5] - t[2] * R[8],
+			1,
+		],
+	].flat();
+	return camToWorld;
 }
 
 function multiply4(a, b) {
@@ -190,10 +315,6 @@ function translate4(a, x, y, z) {
 		a[2] * x + a[6] * y + a[10] * z + a[14],
 		a[3] * x + a[7] * y + a[11] * z + a[15],
 	];
-}
-
-function fov2focal(fov, length) {
-	return (length / 2) / Math.tan((fov * Math.PI) / 360);
 }
 
 function createWorker(self) {
@@ -375,6 +496,156 @@ function createWorker(self) {
 		]);
 	}
 
+	// function processPlyBuffer(inputBuffer) {
+	// 	const ubuf = new Uint8Array(inputBuffer);
+	// 	// 10KB ought to be enough for a header...
+	// 	const header = new TextDecoder().decode(ubuf.slice(0, 1024 * 10));
+	// 	const header_end = "end_header\n";
+	// 	const header_end_index = header.indexOf(header_end);
+	// 	if (header_end_index < 0)
+	// 		throw new Error("Unable to read .ply file header");
+	// 	const vertexCount = parseInt(/element vertex (\d+)\n/.exec(header)[1]);
+	// 	console.log("Vertex Count", vertexCount);
+	// 	let row_offset = 0,
+	// 		offsets = {},
+	// 		types = {};
+	// 	const TYPE_MAP = {
+	// 		double: "getFloat64",
+	// 		int: "getInt32",
+	// 		uint: "getUint32",
+	// 		float: "getFloat32",
+	// 		short: "getInt16",
+	// 		ushort: "getUint16",
+	// 		uchar: "getUint8",
+	// 	};
+	// 	for (let prop of header
+	// 		.slice(0, header_end_index)
+	// 		.split("\n")
+	// 		.filter((k) => k.startsWith("property "))) {
+	// 		const [p, type, name] = prop.split(" ");
+	// 		const arrayType = TYPE_MAP[type] || "getInt8";
+	// 		types[name] = arrayType;
+	// 		offsets[name] = row_offset;
+	// 		row_offset += parseInt(arrayType.replace(/[^\d]/g, "")) / 8;
+	// 	}
+	// 	console.log("Bytes per row", row_offset, types, offsets);
+
+	// 	let dataView = new DataView(
+	// 		inputBuffer,
+	// 		header_end_index + header_end.length,
+	// 	);
+	// 	let row = 0;
+	// 	const attrs = new Proxy(
+	// 		{},
+	// 		{
+	// 			get(target, prop) {
+	// 				if (!types[prop]) throw new Error(prop + " not found");
+	// 				return dataView[types[prop]](
+	// 					row * row_offset + offsets[prop],
+	// 					true,
+	// 				);
+	// 			},
+	// 		},
+	// 	);
+
+	// 	console.time("calculate importance");
+	// 	let sizeList = new Float32Array(vertexCount);
+	// 	let sizeIndex = new Uint32Array(vertexCount);
+	// 	for (row = 0; row < vertexCount; row++) {
+	// 		sizeIndex[row] = row;
+	// 		if (!types["scale_0"]) continue;
+	// 		const size =
+	// 			Math.exp(attrs.scale_0) *
+	// 			Math.exp(attrs.scale_1) *
+	// 			Math.exp(attrs.scale_2);
+	// 		const opacity = 1 / (1 + Math.exp(-attrs.opacity));
+	// 		sizeList[row] = size * opacity;
+	// 	}
+	// 	console.timeEnd("calculate importance");
+
+	// 	console.time("sort");
+	// 	sizeIndex.sort((b, a) => sizeList[a] - sizeList[b]);
+	// 	console.timeEnd("sort");
+
+	// 	// 6*4 + 4 + 4 = 8*4
+	// 	// XYZ - Position (Float32)
+	// 	// XYZ - Scale (Float32)
+	// 	// RGBA - colors (uint8)
+	// 	// IJKL - quaternion/rot (uint8)
+	// 	const rowLength = 3 * 4 + 3 * 4 + 4 + 4;
+	// 	const buffer = new ArrayBuffer(rowLength * vertexCount);
+
+	// 	console.time("build buffer");
+
+	// 	for (let j = 0; j < vertexCount; j++) {
+	// 		row = sizeIndex[j];
+
+	// 		const position = new Float32Array(buffer, j * rowLength, 3);
+	// 		const scales = new Float32Array(buffer, j * rowLength + 4 * 3, 3);
+	// 		const rgba = new Uint8ClampedArray(
+	// 			buffer,
+	// 			j * rowLength + 4 * 3 + 4 * 3,
+	// 			4,
+	// 		);
+	// 		const rot = new Uint8ClampedArray(
+	// 			buffer,
+	// 			j * rowLength + 4 * 3 + 4 * 3 + 4,
+	// 			4,
+	// 		);
+
+	// 		if (types["scale_0"]) {
+	// 			const qlen = Math.sqrt(
+	// 				attrs.rot_0 ** 2 +
+	// 				attrs.rot_1 ** 2 +
+	// 				attrs.rot_2 ** 2 +
+	// 				attrs.rot_3 ** 2,
+	// 			);
+	// 			console.log("scale", attrs.scale_0, attrs.scale_1, attrs.scale_2);
+	// 			rot[0] = (attrs.rot_0 / qlen) * 128 + 128;
+	// 			rot[1] = (attrs.rot_1 / qlen) * 128 + 128;
+	// 			rot[2] = (attrs.rot_2 / qlen) * 128 + 128;
+	// 			rot[3] = (attrs.rot_3 / qlen) * 128 + 128;
+
+	// 			scales[0] = Math.exp(attrs.scale_0);
+	// 			scales[1] = Math.exp(attrs.scale_1);
+	// 			scales[2] = Math.exp(attrs.scale_2);
+	// 		} else {
+	// 			scales[0] = 0.01;
+	// 			scales[1] = 0.01;
+	// 			scales[2] = 0.01;
+
+	// 			rot[0] = 255;
+	// 			rot[1] = 0;
+	// 			rot[2] = 0;
+	// 			rot[3] = 0;
+	// 		}
+
+	// 		position[0] = attrs.x;
+	// 		position[1] = attrs.y;
+	// 		position[2] = attrs.z;
+
+	// 		if (types["f_dc_0"]) {
+	// 			const SH_C0 = 0.28209479177387814;
+	// 			rgba[0] = (0.5 + SH_C0 * attrs.f_dc_0) * 255;
+	// 			rgba[1] = (0.5 + SH_C0 * attrs.f_dc_1) * 255;
+	// 			rgba[2] = (0.5 + SH_C0 * attrs.f_dc_2) * 255;
+	// 			// color = computeColorFromSH(settings.shDegree, position, campos, [attrs.f_dc_0, attrs.f_dc_1, attrs.f_dc_2, attrs.f_rest_0, attrs.f_rest_1, attrs.f_rest_2, attrs.f_rest_3, attrs.f_rest_4, attrs.f_rest_5, attrs.f_rest_6, attrs.f_rest_7, attrs.f_rest_8]);
+
+	// 		} else {
+	// 			rgba[0] = attrs.red;
+	// 			rgba[1] = attrs.green;
+	// 			rgba[2] = attrs.blue;
+	// 		}
+	// 		if (types["opacity"]) {
+	// 			rgba[3] = (1 / (1 + Math.exp(-attrs.opacity))) * 255;
+	// 		} else {
+	// 			rgba[3] = 255;
+	// 		}
+	// 	}
+	// 	console.timeEnd("build buffer");
+	// 	return buffer;
+	// }
+
 	const throttledSort = () => {
 		if (!sortRunning) {
 			sortRunning = true;
@@ -400,7 +671,7 @@ function createWorker(self) {
 		} else if (e.data.buffer) {
 			buffer = e.data.buffer;
 			vertexCount = e.data.vertexCount;
-			// console.log("Recive Vertex Count", vertexCount);
+			console.log("Recive Vertex Count", vertexCount);
 		} else if (e.data.vertexCount) {
 			vertexCount = e.data.vertexCount;
 		} else if (e.data.view) {
@@ -489,7 +760,11 @@ void main () {
 
 `.trim();
 
-let defaultViewMatrix = dataSource.defaultViewMatrix;
+// let defaultViewMatrix = [0.578, 0.190, -0.790, 0, 
+//                         0.814, -0.142, 0.555, 0, 
+//                         -0.011, -0.975, -0.237, 0, 
+//                         0.104, 0.080, 3.48, 0.999]
+let defaultViewMatrix = dataSource.defaultViewMatrix
 
 let viewMatrix = defaultViewMatrix;
 let lastViewMatrix = viewMatrix;
@@ -498,14 +773,12 @@ let stopReading = false;
 let worker = null;
 let octreeGeometry, octreeGeometryLoader;
 const gaussianSplats = {}
-import { loadPointCloud } from "./potree.js"
+import { loadPointCloud } from "../potree.js"
 
 // Init settings GUI panel
-let videoPlay = false;
-let start = 0; 
 function initGUI(resize) {
 	const gui = new lil.GUI({ title: 'LetsGo Settings' })
-	// gui.add(settings, 'renderingMode', ['Gaussian', 'Octree']).name('Rendering Mode')
+	gui.add(settings, 'renderingMode', ['Gaussian', 'Octree']).name('Rendering Mode')
 	gui.add(settings, 'sortTime').name('Sort Time').disable().listen()
 	gui.add(settings, 'fps').name('FPS').disable().listen()
 	// gui.add(settings, 'renderResolution', 0.1, 1, 0.01).name('Preview Resolution')
@@ -513,20 +786,11 @@ function initGUI(resize) {
 
 
 
-	gui.add(settings, 'lodLevel', settings.baseLevel, settings.maxLevel, 1).name('LOD Level')
+	gui.add(settings, 'lodLevel', 0, 8, 1).name('LOD Level')
 		.onChange(async value => {
 			try {
 				stopReading = true;
 				await updateGaussianByView(viewMatrix, projectionMatrix, value, settings.maxGaussians)
-
-				if (value > settings.maxLevel) {
-					value = settings.maxLevel;
-				}
-
-				if (value < settings.baseLevel) {
-					value = settings.baseLevel;
-				}
-
 			} catch (error) {
 				throw error
 			}
@@ -542,170 +806,43 @@ function initGUI(resize) {
 			}
 		})
 
-	let controller = gui.add(settings, 'shDegree', 0, 2, 1).name('SH Degree')
+	gui.add(settings, 'scalingBeta', 1, 16, 1).name('scalingBeta')
 		.onChange(async value => {
 			try {
 				stopReading = true;
-				// await updateGaussianByView(viewMatrix, projectionMatrix, settings.lodLevel, settings.maxGaussians)
-			} catch (error) {
-				throw error
-			}
-		})
-	
-	// Disable the controller
-	controller.domElement.style.pointerEvents = 'none';
-	controller.domElement.style.opacity = '0.5';
-
-	gui.add(settings, 'fov', 60, 120, 1).name('FOV')
-		.onChange(async value => {
-			try {
-				stopReading = true;
-				let fx = fov2focal(value, innerWidth);
-				let fy = fov2focal(value, innerWidth);
-
-				if (settings.testingMode) {
-					// NOTE: manually set the canvas size for computing PSNR,...
-					innerWidth = 734;
-					innerHeight = 734;
-					fx = settings.fx;
-					fy = settings.fy;
-				}
-				
-				projectionMatrix = getProjectionMatrix(
-					fx,
-					fy,
-					innerWidth,
-					innerHeight,
-				);
-				resize();
-				await updateGaussianByView(viewMatrix, projectionMatrix, settings.lodLevel, settings.maxGaussians)
+				await updateGaussianByView(viewMatrix, projectionMatrix, settings.lodLevel, value)
 			} catch (error) {
 				throw error
 			}
 		})
 
-		gui.add(settings, 'poseId', 0, 1200, 5).name('Trajectory').listen()
+	gui.add(settings, 'shDegree', 0, 2, 1).name('SH Degree')
 		.onChange(async value => {
 			try {
 				stopReading = true;
-				if (value > cameras.length - 1 ) value = cameras.length - 1;
-				settings.poseId = value;
-
-				viewMatrix = cameras[value].viewMatrix;
-				
-				await updateGaussianByView(viewMatrix, projectionMatrix, settings.lodLevel, settings.maxGaussians)
-
+				await updateGaussianByView(viewMatrix, projectionMatrix, settings.lodLevel, value)
 			} catch (error) {
 				throw error
 			}
 		})
 
-	
-	let intervalId;
-	// 创建一个新的 div 元素来包含按钮
-	const div = document.createElement('div');
-	div.style.display = 'flex'; // 设置 div 为 flex 布局
-	div.style.justifyContent = 'flex-end'; // 将内容对齐到右边
-
-	const addButton = document.createElement('button');
-	addButton.textContent = '+';
-	addButton.style.width = '20px'; // 设置宽度
-	addButton.style.height = '20px'; // 设置高度
-	addButton.style.marginRight = '5px'; // 在右边添加一些空间
-	addButton.addEventListener('mousedown', () => {
-		// 当按钮被按下时，开始连续增加 poseId 的值
-		intervalId = setInterval(() => {
-			settings.poseId += 1;
-			if (settings.poseId > cameras.length - 1) {
-				settings.poseId = cameras.length - 1;
-			}
-			viewMatrix = cameras[settings.poseId].viewMatrix;
-			updateGaussianByView(viewMatrix, projectionMatrix, settings.lodLevel, settings.maxGaussians)
-				.catch(error => {
-					throw error;
-				});
-		}, 10); // 每 10 毫秒增加一次
-	});
-	addButton.addEventListener('mouseup', () => {
-		// 当按钮被松开时，停止增加 poseId 的值
-		clearInterval(intervalId);
-	});
-	addButton.addEventListener('mouseleave', () => {
-		// 当鼠标离开按钮时，停止增加 poseId 的值
-		clearInterval(intervalId);
-	});
-
-	const subButton = document.createElement('button');
-	subButton.textContent = '-';
-	subButton.style.width = '20px'; // 设置宽度
-	subButton.style.height = '20px'; // 设置高度
-	subButton.style.marginRight = '4px'; // 在右边添加一些空间
-	subButton.addEventListener('mousedown', () => {
-		// 当按钮被按下时，开始连续减少 poseId 的值
-		intervalId = setInterval(() => {
-			settings.poseId -= 1;
-			if (settings.poseId < 0) {
-				settings.poseId = 0;
-			}
-			viewMatrix = cameras[settings.poseId].viewMatrix;
-			updateGaussianByView(viewMatrix, projectionMatrix, settings.lodLevel, settings.maxGaussians)
-				.catch(error => {
-					throw error;
-				});
-		}, 10); // 每 10 毫秒减少一次
-	});
-	subButton.addEventListener('mouseup', () => {
-		// 当按钮被松开时，停止减少 poseId 的值
-		clearInterval(intervalId);
-	});
-	subButton.addEventListener('mouseleave', () => {
-		// 当鼠标离开按钮时，停止减少 poseId 的值
-		clearInterval(intervalId);
-	});
-
-	const playButton = document.createElement('button');
-	playButton.textContent = '▶';
-	playButton.style.width = '20px'; // 设置宽度
-	playButton.style.height = '20px'; // 设置高度
-	playButton.style.marginRight = '4px'; // 在右边添加一些空间
-	playButton.addEventListener('mousedown', () => {
-		start = Date.now();
-		videoPlay = true;
-	});
-
-	const stopButton = document.createElement('button');
-	stopButton.textContent = '■';
-	stopButton.style.width = '20px'; // 设置宽度
-	stopButton.style.height = '20px'; // 设置高度
-	stopButton.style.marginRight = '4px'; // 在右边添加一些空间
-	stopButton.addEventListener('mousedown', () => {
-		start = Date.now();
-		videoPlay = false;
-	});
-
-
-	// 将按钮添加到 div 中
-	div.appendChild(playButton);
-	div.appendChild(stopButton);
-	div.appendChild(addButton);
-	div.appendChild(subButton);
 
 	// 创建一个包含说明文案的HTML元素
 	const description = document.createElement('div');
 	description.innerHTML = ' Parameters:\
 	<br /> LOD Level: Controls the level-of-detail of 3DGS model. Higher values result in more details \
-	<br /><br /> Ext Gaussians: Controls the extra number of Gaussians. Increasing this value adds detail and complexity to the scene, but may also increase loading times and performance overhead. Adjust based on scene complexity and device capabilities. ';
+	<br /><br /> Ext Gaussians: Controls the extra number of Gaussians when level > 4. Increasing this value adds detail and complexity to the scene, but may also increase loading times and performance overhead. Adjust based on scene complexity and device capabilities. \
+	<br /><br /> scalingBeta: Controls coef of the level decreasing from distance. Increasing this value will result in fast level decreasing from neaf to far';
 	description.style.fontSize = '12px';
 	description.style.color = '#fff';
 	description.style.padding = '8px';
-	description.style.opacity = 0.7;
+	description.style.opacity = 0.8;
 	description.style.lineHeight = '150%';
 
 	// 将HTML元素添加到GUI界面中
 	const firstChildDiv = gui.domElement.querySelector('.children');
-	firstChildDiv.appendChild(div);
-	
 	firstChildDiv.appendChild(description);
+
 
 }
 const chunksData = [];
@@ -795,23 +932,11 @@ async function main() {
 	gl.vertexAttribDivisor(a_index, 1);
 
 	const resize = () => {
-		let fx = fov2focal(settings.fov, innerWidth);
-		let fy = fov2focal(settings.fov, innerWidth);
-
-		if (settings.testingMode) {
-			// NOTE: manually set the canvas size for computing PSNR,...
-			innerWidth = 734;
-			innerHeight = 734;
-			fx = settings.fx;
-			fy = settings.fy;
-		}
-
-
-		gl.uniform2fv(u_focal, new Float32Array([fx, fy]));
-
+		gl.uniform2fv(u_focal, new Float32Array([camera.fx, camera.fy]));
 
 		projectionMatrix = getProjectionMatrix(
-			fx, fy,
+			camera.fx,
+			camera.fy,
 			innerWidth,
 			innerHeight,
 		);
@@ -895,15 +1020,14 @@ async function main() {
 					viewMatrix.map((k) => Math.round(k * 100) / 100),
 				);
 		} else if (e.code === "KeyP") {
-			viewMatrix = defaultViewMatrix;
-			updateGaussianByView(viewMatrix, projectionMatrix, settings.lodLevel, settings.maxGaussians);
 			carousel = true;
 		}
 	});
 	window.addEventListener("keyup", (e) => {
 		activeKeys = activeKeys.filter((k) => k !== e.code);
 		e.preventDefault();
-		// startReloadDefault();
+		// startReloadLod();
+		// console.log(viewMatrix)
 		down = false;
 		startX = 0;
 		startY = 0;
@@ -956,11 +1080,10 @@ async function main() {
 		{ passive: false },
 	);
 
-	let startX, startY;
-	let down = false;
+	let startX, startY, down;
 	canvas.addEventListener("mousedown", (e) => {
 		carousel = false;
-		// e.preventDefault();
+		e.preventDefault();
 		startX = e.clientX;
 		startY = e.clientY;
 		down = e.ctrlKey || e.metaKey ? 2 : 1;
@@ -968,14 +1091,14 @@ async function main() {
 
 	canvas.addEventListener("contextmenu", (e) => {
 		carousel = false;
-		// e.preventDefault();
+		e.preventDefault();
 		startX = e.clientX;
 		startY = e.clientY;
 		down = 2;
 	});
 
 	canvas.addEventListener("mousemove", (e) => {
-		// e.preventDefault();
+		e.preventDefault();
 		if (down == 1) {
 			let inv = invert4(viewMatrix);
 			let dx = (5 * (e.clientX - startX)) / innerWidth;
@@ -1011,121 +1134,121 @@ async function main() {
 		}
 	});
 	canvas.addEventListener("mouseup", (e) => {
-		// e.preventDefault();
-		console.log(viewMatrix)
+		e.preventDefault();
 		startReloadLod();
+		console.log(viewMatrix)
 		down = false;
 		startX = 0;
 		startY = 0;
 
 	});
 
-	// let altX = 0,
-	// 	altY = 0;
-	// canvas.addEventListener(
-	// 	"touchstart",
-	// 	(e) => {
-	// 		e.preventDefault();
-	// 		if (e.touches.length === 1) {
-	// 			carousel = false;
-	// 			startX = e.touches[0].clientX;
-	// 			startY = e.touches[0].clientY;
-	// 			down = 1;
-	// 		} else if (e.touches.length === 2) {
-	// 			// console.log('beep')
-	// 			carousel = false;
-	// 			startX = e.touches[0].clientX;
-	// 			altX = e.touches[1].clientX;
-	// 			startY = e.touches[0].clientY;
-	// 			altY = e.touches[1].clientY;
-	// 			down = 1;
-	// 		}
-	// 	},
-	// 	{ passive: false },
-	// );
-	// canvas.addEventListener(
-	// 	"touchmove",
-	// 	(e) => {
-	// 		e.preventDefault();
-	// 		if (e.touches.length === 1 && down) {
-	// 			let inv = invert4(viewMatrix);
-	// 			let dx = (4 * (e.touches[0].clientX - startX)) / innerWidth;
-	// 			let dy = (4 * (e.touches[0].clientY - startY)) / innerHeight;
+	let altX = 0,
+		altY = 0;
+	canvas.addEventListener(
+		"touchstart",
+		(e) => {
+			e.preventDefault();
+			if (e.touches.length === 1) {
+				carousel = false;
+				startX = e.touches[0].clientX;
+				startY = e.touches[0].clientY;
+				down = 1;
+			} else if (e.touches.length === 2) {
+				// console.log('beep')
+				carousel = false;
+				startX = e.touches[0].clientX;
+				altX = e.touches[1].clientX;
+				startY = e.touches[0].clientY;
+				altY = e.touches[1].clientY;
+				down = 1;
+			}
+		},
+		{ passive: false },
+	);
+	canvas.addEventListener(
+		"touchmove",
+		(e) => {
+			e.preventDefault();
+			if (e.touches.length === 1 && down) {
+				let inv = invert4(viewMatrix);
+				let dx = (4 * (e.touches[0].clientX - startX)) / innerWidth;
+				let dy = (4 * (e.touches[0].clientY - startY)) / innerHeight;
 
-	// 			let d = 4;
-	// 			inv = translate4(inv, 0, 0, d);
-	// 			// inv = translate4(inv,  -x, -y, -z);
-	// 			// inv = translate4(inv,  x, y, z);
-	// 			inv = rotate4(inv, dx, 0, 1, 0);
-	// 			inv = rotate4(inv, -dy, 1, 0, 0);
-	// 			inv = translate4(inv, 0, 0, -d);
+				let d = 4;
+				inv = translate4(inv, 0, 0, d);
+				// inv = translate4(inv,  -x, -y, -z);
+				// inv = translate4(inv,  x, y, z);
+				inv = rotate4(inv, dx, 0, 1, 0);
+				inv = rotate4(inv, -dy, 1, 0, 0);
+				inv = translate4(inv, 0, 0, -d);
 
-	// 			viewMatrix = invert4(inv);
+				viewMatrix = invert4(inv);
 
-	// 			startX = e.touches[0].clientX;
-	// 			startY = e.touches[0].clientY;
-	// 		} else if (e.touches.length === 2) {
-	// 			// alert('beep')
-	// 			const dtheta =
-	// 				Math.atan2(startY - altY, startX - altX) -
-	// 				Math.atan2(
-	// 					e.touches[0].clientY - e.touches[1].clientY,
-	// 					e.touches[0].clientX - e.touches[1].clientX,
-	// 				);
-	// 			const dscale =
-	// 				Math.hypot(startX - altX, startY - altY) /
-	// 				Math.hypot(
-	// 					e.touches[0].clientX - e.touches[1].clientX,
-	// 					e.touches[0].clientY - e.touches[1].clientY,
-	// 				);
-	// 			const dx =
-	// 				(e.touches[0].clientX +
-	// 					e.touches[1].clientX -
-	// 					(startX + altX)) /
-	// 				2;
-	// 			const dy =
-	// 				(e.touches[0].clientY +
-	// 					e.touches[1].clientY -
-	// 					(startY + altY)) /
-	// 				2;
-	// 			let inv = invert4(viewMatrix);
-	// 			// inv = translate4(inv,  0, 0, d);
-	// 			inv = rotate4(inv, dtheta, 0, 0, 1);
+				startX = e.touches[0].clientX;
+				startY = e.touches[0].clientY;
+			} else if (e.touches.length === 2) {
+				// alert('beep')
+				const dtheta =
+					Math.atan2(startY - altY, startX - altX) -
+					Math.atan2(
+						e.touches[0].clientY - e.touches[1].clientY,
+						e.touches[0].clientX - e.touches[1].clientX,
+					);
+				const dscale =
+					Math.hypot(startX - altX, startY - altY) /
+					Math.hypot(
+						e.touches[0].clientX - e.touches[1].clientX,
+						e.touches[0].clientY - e.touches[1].clientY,
+					);
+				const dx =
+					(e.touches[0].clientX +
+						e.touches[1].clientX -
+						(startX + altX)) /
+					2;
+				const dy =
+					(e.touches[0].clientY +
+						e.touches[1].clientY -
+						(startY + altY)) /
+					2;
+				let inv = invert4(viewMatrix);
+				// inv = translate4(inv,  0, 0, d);
+				inv = rotate4(inv, dtheta, 0, 0, 1);
 
-	// 			inv = translate4(inv, -dx / innerWidth, -dy / innerHeight, 0);
+				inv = translate4(inv, -dx / innerWidth, -dy / innerHeight, 0);
 
-	// 			// let preY = inv[13];
-	// 			inv = translate4(inv, 0, 0, 3 * (1 - dscale));
-	// 			// inv[13] = preY;
+				// let preY = inv[13];
+				inv = translate4(inv, 0, 0, 3 * (1 - dscale));
+				// inv[13] = preY;
 
-	// 			viewMatrix = invert4(inv);
+				viewMatrix = invert4(inv);
 
-	// 			startX = e.touches[0].clientX;
-	// 			altX = e.touches[1].clientX;
-	// 			startY = e.touches[0].clientY;
-	// 			altY = e.touches[1].clientY;
-	// 		}
-	// 	},
-	// 	{ passive: false },
-	// );
-	// canvas.addEventListener(
-	// 	"touchend",
-	// 	(e) => {
-	// 		e.preventDefault();
-	// 		startReloadLod();
-	// 		down = false;
-	// 		startX = 0;
-	// 		startY = 0;
-	// 	},
-	// 	{ passive: false },
-	// );
+				startX = e.touches[0].clientX;
+				altX = e.touches[1].clientX;
+				startY = e.touches[0].clientY;
+				altY = e.touches[1].clientY;
+			}
+		},
+		{ passive: false },
+	);
+	canvas.addEventListener(
+		"touchend",
+		(e) => {
+			e.preventDefault();
+			startReloadLod();
+			down = false;
+			startX = 0;
+			startY = 0;
+		},
+		{ passive: false },
+	);
 
 	let jumpDelta = 0;
 	let vertexCount = 0;
 
 	let lastFrame = 0;
 	let avgFps = 0;
-
+	let start = 0; 
 
 	window.addEventListener("gamepadconnected", (e) => {
 		const gp = navigator.getGamepads()[e.gamepad.index];
@@ -1139,45 +1262,6 @@ async function main() {
 
 	let leftGamepadTrigger, rightGamepadTrigger;
 
-	function canvasSaveAsImage(filename) {
-			// output images
-		let width = innerWidth;
-		let height = innerHeight;
-		// 1. 从颜色缓冲区中读取像素数据v
-		const pixels = new Uint8Array(width * height * 4);
-		gl.readPixels(0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
-
-		// 2. 创建一个新的 ImageData 对象，并以反向的顺序填充其像素数据
-		const flippedPixels = new Uint8ClampedArray(width * height * 4);
-		for (let y = 0; y < height; y++) {
-			for (let x = 0; x < width; x++) {
-				for (let c = 0; c < 4; c++) {
-					flippedPixels[(y * width + x) * 4 + c] = pixels[((height - y - 1) * width + x) * 4 + c];
-				}
-			}
-		}
-		const imageData = new ImageData(flippedPixels, width, height);
-
-		// 3. 创建一个新的 canvas 元素，并将 ImageData 对象绘制到这个 canvas 上
-		const canvas = document.createElement('canvas');
-		canvas.width = width;
-		canvas.height = height;
-		const context = canvas.getContext('2d');
-		context.putImageData(imageData, 0, 0);
-
-		// 4. 将 canvas 的内容转换为一个 data URL
-		// const dataUrl = canvas.toDataURL('image/jpeg');
-		const dataUrl = canvas.toDataURL('image/png');
-
-		// 5. 创建一个新的 a 元素，设置它的 href 属性为上一步中生成的 data URL
-		const link = document.createElement('a');
-		link.href = dataUrl;
-		link.download = filename;
-
-		// 6. 触发 a 元素的 click 事件
-		link.click();
-}
-	let init = false;
 	const frame = (now) => {
 		let inv = invert4(viewMatrix);
 		let shiftKey = activeKeys.includes("Shift") || activeKeys.includes("ShiftLeft") || activeKeys.includes("ShiftRight")
@@ -1201,14 +1285,24 @@ async function main() {
 		//
 		if (activeKeys.includes("KeyD"))
 			inv = translate4(inv, 0.03, 0, 0);
+		// inv = rotate4(inv, 0.01, 0, 1, 0);
+		// if (activeKeys.includes("KeyW")) inv = rotate4(inv, 0.005, 1, 0, 0);
+		// if (activeKeys.includes("KeyS")) inv = rotate4(inv, -0.005, 1, 0, 0);
+		// if (activeKeys.includes("KeyA")) inv = rotate4(inv, -0.01, 0, 1, 0);
+		// if (activeKeys.includes("KeyD")) inv = rotate4(inv, 0.01, 0, 1, 0);
 
 		if (activeKeys.includes("KeyQ")) inv = rotate4(inv, 0.01, 0, 0, 1);
 		if (activeKeys.includes("KeyE")) inv = rotate4(inv, -0.01, 0, 0, 1);
 
 		if (activeKeys.includes("Space")) {
-			start = Date.now();
-			videoPlay = !videoPlay;
-		} 
+			inv = translate4(inv, 0, -0.05, 0);
+			inv = rotate4(inv, -0.005, 1, 0, 0);
+		}
+
+		if (activeKeys.includes("ShiftLeft")) {
+			inv = translate4(inv, 0, 0.05, 0);
+			inv = rotate4(inv, 0.005, 1, 0, 0);
+		}
 
 		const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
 		let isJumping = activeKeys.includes("Ctrl");
@@ -1273,39 +1367,36 @@ async function main() {
 				carousel = true;
 			}
 		}
-	{
-		// if (
-		// 	["KeyJ", "KeyK", "KeyL", "KeyI"].some((k) => activeKeys.includes(k))
-		// ) {
-		// 	startReloadDefault();
-		// 	let d = 4;
-		// 	inv = translate4(inv, 0, 0, d);
-		// 	inv = rotate4(
-		// 		inv,
-		// 		activeKeys.includes("KeyJ")
-		// 			? -0.05
-		// 			: activeKeys.includes("KeyL")
-		// 				? 0.05
-		// 				: 0,
-		// 		0,
-		// 		1,
-		// 		0,
-		// 	);
-		// 	inv = rotate4(
-		// 		inv,
-		// 		activeKeys.includes("KeyI")
-		// 			? 0.05
-		// 			: activeKeys.includes("KeyK")
-		// 				? -0.05
-		// 				: 0,
-		// 		1,
-		// 		0,
-		// 		0,
-		// 	);
-		// 	inv = translate4(inv, 0, 0, -d);
-		// }
 
-	}
+		if (
+			["KeyJ", "KeyK", "KeyL", "KeyI"].some((k) => activeKeys.includes(k))
+		) {
+			let d = 4;
+			inv = translate4(inv, 0, 0, d);
+			inv = rotate4(
+				inv,
+				activeKeys.includes("KeyJ")
+					? -0.05
+					: activeKeys.includes("KeyL")
+						? 0.05
+						: 0,
+				0,
+				1,
+				0,
+			);
+			inv = rotate4(
+				inv,
+				activeKeys.includes("KeyI")
+					? 0.05
+					: activeKeys.includes("KeyK")
+						? -0.05
+						: 0,
+				1,
+				0,
+				0,
+			);
+			inv = translate4(inv, 0, 0, -d);
+		}
 
 		viewMatrix = invert4(inv);
 
@@ -1317,28 +1408,6 @@ async function main() {
 			inv = rotate4(inv, -0.6 * t, 0, 1, 0);
 
 			viewMatrix = invert4(inv);
-		}
-
-		if (videoPlay) {
- 			const t = Math.max((Date.now() - start) / 50, 0 );
-			let i = Math.round(t) + 50;
-			if (i >= cameras.length - 1) {
-				videoPlay = false;
-			} else {
-				viewMatrix = cameras[i].viewMatrix;
-				settings.poseId = i;
-			}
-
-			if (i % 100 == 0) {
-				update_count = 0;
-				reloadLod = true;
-				updateGaussianByView(viewMatrix, projectionMatrix, settings.lodLevel, settings.maxGaussians)
-					.catch(error => {
-						throw error;
-					});
-				}
- 
-
 		}
 
 		const viewProj = multiply4(projectionMatrix, viewMatrix);
@@ -1353,22 +1422,14 @@ async function main() {
 			lastViewProj[6] / lastViewProjNorm * viewProj[6] / viewProjNorm +
 			lastViewProj[10] / lastViewProjNorm * viewProj[10] / viewProjNorm;
 
-		// if (reloadDefault && settings.renderingMode == "Octree" && Math.abs(dot - 1) > 0.001) {
-		// 	stopReading = true;
-		// 	updateGaussianDefault(settings.lodLevel);
-		// 	reloadDefault = false;
-		// }
-
-		// if ((reloadLod || activeKeys.includes("ControlLeft")) && settings.renderingMode == "Octree" && Math.abs(dot - 1) > 0.001) {
-		if ((reloadLod || activeKeys.includes("ControlLeft")) && settings.renderingMode == "Octree" ) {
-			reloadLod = false;
+		if ((reloadLod || activeKeys.includes("ControlLeft")) && settings.renderingMode == "Octree" && Math.abs(dot - 1) > 0.01) {
 			// console.log(viewMatrix)
 			stopReading = true;
 			updateGaussianByView(viewMatrix, projectionMatrix, settings.lodLevel, settings.maxGaussians);
 			lastViewMatrix = viewMatrix;
 		}
 
-		const currentFps = 1000 / ( now - lastFrame) || 0;
+		const currentFps = 1000 / (now - lastFrame) || 0;
 		avgFps = avgFps * 0.9 + currentFps * 0.1;
 
 		if (vertexCount > 0) {
@@ -1381,38 +1442,17 @@ async function main() {
 			// document.getElementById("spinner").style.display = "";
 			start = Date.now() + 2000;
 		}
+		const progress = (100 * vertexCount) / (splatData.length / rowLength);
+		if (progress < 95) {
+			document.getElementById("progress").style.width = progress + "%";
+		} else {
+			document.getElementById("progress").style.display = "none";
+			document.getElementById("spinner").style.display = "none";
+		}
 
 		settings.fps = Math.round(avgFps)
 		lastFrame = now;
 		requestAnimationFrame(frame);
-
-		if (activeKeys.includes("KeyC")) {
-			// image capture
-			canvasSaveAsImage('screenshot.png');
-		}
-
-		if (activeKeys.includes("KeyR") && settings.testingMode) {
-			// video record
-			const recordCameras = async () => {
-				for (let i = 0; i < cameras.length; i++) {
-					viewMatrix = cameras[i].viewMatrix;
-					settings.poseId = i;
-					reloadLod = true;
-					await updateGaussianByView(viewMatrix, projectionMatrix, settings.lodLevel, settings.maxGaussians);
-					// wait 0.5 second
-					await new Promise(resolve => setTimeout(resolve, 1500));
-					console.log('poseId', settings.poseId);
-			
-					// Use requestAnimationFrame to ensure WebGL has finished rendering
-					await new Promise(resolve => requestAnimationFrame(resolve));
-			
-					// canvasSaveAsImage(`image_${i}.jpg`);
-					canvasSaveAsImage(`${String(i).padStart(5, '0')}.png`);
-				}
-			};
-
-			recordCameras();
-		}
 	};
 
 	frame();
@@ -1427,10 +1467,9 @@ async function main() {
 			fr.onload = () => {
 				cameras = JSON.parse(fr.result);
 				viewMatrix = getViewMatrix(cameras[0]);
-				fx, fy = fov2focal(settings.fov, innerWidth, innerHeight);
 				projectionMatrix = getProjectionMatrix(
-					fx / downsample,
-					fy / downsample,
+					camera.fx / downsample,
+					camera.fy / downsample,
 					canvas.width,
 					canvas.height,
 				);
@@ -1486,6 +1525,26 @@ async function main() {
 	let lastVertexCount = -1;
 	let stopLoading = false;
 
+	// while (true) {
+	// 	const { done, value } = await reader.read();
+	// 	if (done || stopLoading) break;
+
+	// 	splatData.set(value, bytesRead);
+	// 	bytesRead += value.length;
+
+	// 	if (vertexCount > lastVertexCount) {
+	// 		// worker.postMessage({
+	// 		// 	buffer: splatData.buffer,
+	// 		// 	vertexCount: Math.floor(bytesRead / rowLength),
+	// 		// });
+	// 		lastVertexCount = vertexCount;
+	// 	}
+	// }
+	// if (!stopLoading)
+	// 	worker.postMessage({
+	// 		buffer: splatData.buffer,
+	// 		vertexCount: Math.floor(bytesRead / rowLength),
+	// 	});
 }
 
 main().catch((err) => {
@@ -1559,14 +1618,9 @@ async function loadOctreeGeometry(rootNode) {
 	// first for loop to get the count of gaussians
 	while (queue.length > 0) {
 		const currentNode = queue.shift();
-
-		if (currentNode.level === settings.baseLevel) {
-			const currentCount = currentNode.numPoints;
-			vertexCount += currentCount;
-			baseLevelQueue.push({ node: currentNode, level: currentNode.level });
-		}
+		const currentCount = currentNode.numPoints
+		vertexCount += currentCount
 		// set the children of the current node
-
 		if (currentNode.children) {
 			for (let cid = 0; cid < 8; cid++) {
 				const child = currentNode.children[cid];
@@ -1589,21 +1643,6 @@ async function loadOctreeGeometry(rootNode) {
 	queue.push(rootNode)
 	while (queue.length > 0) {
 		const currentNode = queue.shift();
-
-		// set the children of the current node
-		if (currentNode.children) {
-			for (let cid = 0; cid < 8; cid++) {
-				const child = currentNode.children[cid];
-				if (child && "geometry" in child) {
-					queue.push(child);
-				}
-			}
-		}
-
-		if (currentNode.level != settings.baseLevel) {
-			continue;
-		}
-
 		const currentCount = currentNode.numPoints
 		for (let i = 0; i < currentCount; i++) {
 			const positions = new Float32Array(buffer, glabol_i * rowLength, 3);
@@ -1662,20 +1701,19 @@ async function loadOctreeGeometry(rootNode) {
 			glabol_i++;
 
 		}
-
+		// set the children of the current node
+		if (currentNode.children) {
+			for (let cid = 0; cid < 8; cid++) {
+				const child = currentNode.children[cid];
+				if (child && "geometry" in child) {
+					queue.push(child);
+				}
+			}
+		}
 	}
 
 	const loadTime = `${((performance.now() - start) / 1000).toFixed(3)}s`
 	console.log(`[Loader] load ${vertexCount} gaussians in ${loadTime}.`)
-
-	// progressTextDom.innerHTML = ``;
-	// const probar = document.getElementsByClassName("progress-container")?.[0];
-	// if (probar) probar.style.display = "none";
-
-	// load finished
-	document.getElementById("progress").style.display = "none";
-	document.getElementById("spinner").style.display = "none";
-	
 	return buffer;
 }
 let octreeFileUrl;
@@ -1683,7 +1721,7 @@ async function loadScene() {
 	const content = await loadPointCloud(dataSource.metaData, 'geometry', octreeFileUrl)
 	octreeGeometry = content.geometry
 	octreeGeometryLoader = octreeGeometry.loader
-	await new Promise((resolve) => setTimeout(resolve, dataSource.initLoadTime));
+	await new Promise((resolve) => setTimeout(resolve, 500));
 	// wait for the geometry to load
 	console.log('octreeGeometry', octreeGeometry)
 	settings.renderingMode = "Octree";
@@ -1691,7 +1729,8 @@ async function loadScene() {
 	const queue = [{ node: octreeGeometry.root, level: 0 }];
 	while (queue.length > 0) {
 		const { node, level } = queue.shift();
-		if (level <= settings.baseLevel) {
+		// init only handle node with level <= 4
+		if (level <= 4) {
 			// console.log(node)
 			// Load and pre-process gaussian data from .bin file
 			await octreeGeometryLoader.load(node, octreeFileUrl);
@@ -1707,7 +1746,7 @@ async function loadScene() {
 		
 	}
 
-	await new Promise((resolve) => setTimeout(resolve, 200));
+	await new Promise((resolve) => setTimeout(resolve, 50));
 	// init gaussian data and send to worker
 	// 6*4 + 4 + 4 = 8*4
 	// XYZ - Position (Float32)
@@ -1722,27 +1761,26 @@ async function loadScene() {
 		buffer: gaussianSplats.baseBuffer,
 		vertexCount: gaussianSplats.baseVertexCount,
 	})
+	// updateGaussianByView(viewMatrix, projectionMatrix, settings.lodLevel, settings.maxGaussians);
 
 }
 var progressTextDom = document.getElementById("progress-text");
 var progressBarDom = document.getElementById("progressBar");
-const chunkSize = 0.05 * 1024 * 1024 * 1024;//1G
+const chunkSize = 1024 * 1024 * 1024;//1G
+
 
 const startLoadScene = (blob) => {
 	octreeFileUrl = URL.createObjectURL(blob);
 	progressBarDom.style.width = `100%`;
 	loadScene()
-
-	URL.revokeObjectURL(blob);
 }
 async function getFileData() {
-	// const localBlob = await localforage.getItem(`${dataSource.name}_0`);
-	// if (localBlob) {
-	// 	const mergedBlob = await mergeChunks();
-	// 	startLoadScene(mergedBlob)
-	// }
-	// else
-	 {
+	const localBlob = await localforage.getItem(`${dataSource.name}_0`);
+	if (localBlob) {
+		const mergedBlob = await mergeChunks();
+		startLoadScene(mergedBlob)
+	}
+	else {
 		let data = await fetchSetFile(dataSource.octreeUrl)
 
 		const mergedBlob = await mergeChunks(data);
@@ -1753,7 +1791,6 @@ async function fetchSetFile(url) {
 	const totalSize = await getTotalSize(url);
 	const chunkCount = Math.ceil(totalSize / chunkSize);
 	let chunks = []
-	let totalLoaded = 0; // Track the total bytes loaded
 
 	for (let i = 0; i < chunkCount; i++) {
 		const start = i * chunkSize;
@@ -1782,12 +1819,9 @@ async function fetchSetFile(url) {
 		// 
 		xhr.addEventListener('progress', function (event) {
 			if (event.lengthComputable) {
-				// const progress = Math.round((totalLoaded / event.total) * 100);
-				const progress = Math.round((i / chunkCount) * 100);
-				totalLoaded = Math.max(totalLoaded, progress);
-				progressBarDom.style.width = `${totalLoaded}%`;
-				// progressTextDom.innerHTML = `Load Chunk ${i} Resources ${(dataSource.size * progress / 100).toFixed(2)}MB`;
-				progressTextDom.innerHTML = `Load Resources ${(dataSource.size * totalLoaded / 100).toFixed(2)}MB`;
+				const progress = Math.round((event.loaded / event.total) * 100);
+				progressBarDom.style.width = `${progress}%`;
+				progressTextDom.innerHTML = `Load Resources ${(dataSource.size * progress / 100).toFixed(2)}Mb`;
 				if (progress === 100) {
 					progressTextDom.innerText = `File Loaded Successfully, Parsing...`;
 				}
@@ -1839,132 +1873,115 @@ async function mergeChunks(data) {
 getFileData()
 // fetchSetFile(dataSource.octreeUrl)
 
-async function updateGaussianDefault(maxLevel) {
-	if (maxLevel === settings.baseLevel) return;
-	worker.postMessage({
-		buffer: gaussianSplats.baseBuffer,
-		vertexCount: gaussianSplats.baseVertexCount,
-	})
-}
-
 async function updateGaussianByView(viewMatrix, projectionMatrix, maxLevel, maxCount) {
-	update_count += 1;
-	if (update_count > 1) return;
-
-	const start = performance.now();
-	let ZDepthMax = settings.depthMax;
-	
+	const start = performance.now()
+	const queue = [{ node: octreeGeometry.root, level: 0 }];
+	let ZDepthMax = 0;
+	let extLoadedCount = 0;
 	stopReading = false;
 	gaussianSplats.extraVertexCount = 0;
-
-	updateGaussianDefault(maxLevel);
-
-	if (maxLevel === settings.baseLevel) return;
-
-	// queue.push({ node: octreeGeometry.root, level: 0 });
-	let base_level_visibility = new Array(baseLevelQueue.length).fill(true);
-
-	for (let base_index = 0; base_index < baseLevelQueue.length; base_index++) {
-		// console.log(baseLevelQueue[base_index].node);
-		let queue = [];
-		
-		let {ZDepth, visibility} = markCubeVisibility(viewMatrix, projectionMatrix, baseLevelQueue[base_index].node);
-		queue.push({ node: baseLevelQueue[base_index].node, level: baseLevelQueue[base_index].level, ZDepth: ZDepth, visibility: visibility });
-
-		if (!visibility) {
-			queue.pop();
+	// first loop to get far dist in current view and count all extra gaussians
+	while (queue.length > 0) {
+		const { node, level } = queue.shift();
+		if (level <= maxLevel) {
+			let { ZDepth, visibility } = markCubeVisibility(viewMatrix, projectionMatrix, node.boundingSphere.center)
+			ZDepthMax = ZDepthMax > ZDepth ? ZDepthMax : ZDepth;
+			if (visibility && level > 4) extLoadedCount += node.numPoints;
 		}
 
-		//first loop
-		while (queue.length > 0) {
-			const { node, level, ZDepth, visibility } = queue.shift();
-			node.reading = false;
-
-			if (level <= maxLevel) { // reduce some level to avoid too many children
-				// set the children of the current node
-
-				{
-					const beta = Math.log(maxLevel + 1)
-					const actLevel = Math.floor(Math.min(Math.max((maxLevel + 1) * Math.exp(-1.0 * beta * Math.abs(ZDepth) / ZDepthMax), settings.baseLevel), maxLevel));
-					// console.log(actLevel, level, visibility)
-					node.visibility = level >= actLevel ? visibility : false;
-				}
-
-				
-
-				if (node.visibility && !node.reading) {
-					await octreeGeometryLoader.load(node, octreeFileUrl); // load gau point cloud
-					gaussianSplats.extraVertexCount += node.numPoints;
-
-					if (gaussianSplats.extraVertexCount > maxCount) {
-						// console.log("Stop Reading Gaussian Geometry!", gaussianSplats.extraVertexCount, maxCount)
-						break;
-					}
-
-				} else {
-
-					if (level < maxLevel) {
-						for (let cid = 0; cid < 8; cid++) {
-							const child = node.children[cid];
-							if (child) {
-								let { ZDepth, visibility } = markCubeVisibility(viewMatrix, projectionMatrix, child);
-								if (visibility) {
-									queue.push({ node: child, level: level + 1, ZDepth: ZDepth, visibility: visibility });
-								}
-							}
-						}
-					}
-
-				}
+		// set the children of the current node
+		for (let cid = 0; cid < 8; cid++) {
+			const child = node.children[cid];
+			if (child) {
+				// push child node into depth queue
+				queue.push({ node: child, level: level + 1 });
 			}
 		}
 
 	}
 
-	if (gaussianSplats.extraVertexCount > maxCount) {
-		// console.log("Stop Reading Gaussian Geometry!", gaussianSplats.extraVertexCount, maxCount)
-		return;
+	// second loop to get the valid count gaussians
+	queue.push({ node: octreeGeometry.root, level: 0 });
+	while (queue.length > 0) {
+		const { node, level } = queue.shift();
+		node.reading = false;
+		node.visibility = false;
+		if (stopReading) return;
+		if (level <= maxLevel) {
+			let { ZDepth, visibility } = markCubeVisibility(viewMatrix, projectionMatrix, node.boundingSphere.center)
+
+			// default actLevel def by z depth
+			if (extLoadedCount > maxCount) {
+				const actLevel = maxLevel / Math.exp(settings.scalingBeta * ZDepth / ZDepthMax);
+				node.visibility = level === actLevel ? visibility : false;
+			} else {
+				node.visibility = visibility
+			}
+
+			// console.log(node.name, node.visibility)
+
+			// default level <= 4 is visible, and already preloaded
+			if (level <= 4) {
+				node.visibility = true;
+				node.reading = true;
+			}
+
+			// Load and pre-process gaussian data from .bin file for visible node
+			if (node.visibility && !node.reading) {
+				await octreeGeometryLoader.load(node, octreeFileUrl);
+				gaussianSplats.extraVertexCount += node.numPoints;
+				if (gaussianSplats.extraVertexCount > maxCount) {
+					break;
+				}
+			}
+
+			// set the children of the current node
+			for (let cid = 0; cid < 8; cid++) {
+				const child = node.children[cid];
+				if (child) {
+					// push child node into depth queue
+					queue.push({ node: child, level: level + 1 });
+				}
+			}
+		}
 	}
 
-	// Send gaussian data to the worker
-	
 	gaussianSplats.extraBuffer = new ArrayBuffer(gaussianSplats.rowLength * gaussianSplats.extraVertexCount);
 	gaussianSplats.loadedCount = 0;
 	gaussianSplats.lastloadedCount = 0;
 
-	let maxLoop = 64;
+	let maxLoop = 32;
 	let campos = [viewMatrix[2], viewMatrix[6], viewMatrix[10]];
 	// load gaussian data into buffer
-	// while (true) {
-	// 	if (gaussianSplats.loadedCount >= gaussianSplats.extraVertexCount || stopReading || maxLoop-- <= 0) {
-	// 		console.log("Stop Reading Gaussian Geometry!", gaussianSplats.loadedCount, gaussianSplats.extraVertexCount, maxLoop)
-	// 		break;
-	// 	}
-		await readGaussianFromNode(octreeGeometry.root, gaussianSplats, campos, 0); // put something to extrabuffer
+	while (true) {
+		if (gaussianSplats.loadedCount >= gaussianSplats.extraVertexCount || stopReading || maxLoop-- <= 0) {
+			console.log("Stop Reading Guassian Geometry!", gaussianSplats.loadedCount, gaussianSplats.extraVertexCount, maxLoop)
+			break;
+		}
+		await readGaussianFromNode(octreeGeometry.root, gaussianSplats, campos, 0);
 		// Send gaussianSplats data to the worker
-		// if (gaussianSplats.loadedCount > gaussianSplats.lastloadedCount + 200000 || gaussianSplats.loadedCount == gaussianSplats.extraVertexCount) {
-		// 	if (gaussianSplats.loadedCount == gaussianSplats.extraVertexCount) stopReading = true;
-			// let buffer = new ArrayBuffer(currentBaseBuffer.byteLength + gaussianSplats.extraBuffer.byteLength);
-			// let bufferView = new Uint8Array(buffer);
-			// bufferView.set(new Uint8Array(currentBaseBuffer), 0);
-			// bufferView.set(new Uint8Array(gaussianSplats.extraBuffer), currentBaseBuffer.byteLength);
-
-			// worker.postMessage({
-			// 	buffer: buffer,
-			// 	vertexCount: currentBaseVertexCount + gaussianSplats.extraVertexCount,
-			// })
-			// console.log(gaussianSplats.extraVertexCount);
+		if (gaussianSplats.loadedCount > gaussianSplats.lastloadedCount + 200000 || gaussianSplats.loadedCount == gaussianSplats.extraVertexCount) {
+			if (gaussianSplats.loadedCount == gaussianSplats.extraVertexCount) stopReading = true;
+			let buffer = new ArrayBuffer(gaussianSplats.baseBuffer.byteLength + gaussianSplats.extraBuffer.byteLength);
+			// let buffer = new ArrayBuffer(gaussianSplats.extraBuffer.byteLength);
+			let bufferView = new Uint8Array(buffer);
+			bufferView.set(new Uint8Array(gaussianSplats.baseBuffer), 0);
+			bufferView.set(new Uint8Array(gaussianSplats.extraBuffer), gaussianSplats.baseBuffer.byteLength);
+			// bufferView.set(new Uint8Array(gaussianSplats.extraBuffer), 0);
 			worker.postMessage({
-				buffer: gaussianSplats.extraBuffer,
-				vertexCount: gaussianSplats.extraVertexCount,
+				buffer: buffer,
+				vertexCount: gaussianSplats.baseVertexCount + gaussianSplats.extraVertexCount,
 			})
-	// 		gaussianSplats.lastloadedCount = gaussianSplats.loadedCount;
-	// 	}
-	// }
+			// worker.postMessage({
+			// 	buffer: gaussianSplats.extraBuffer,
+			// 	vertexCount: gaussianSplats.extraVertexCount,
+			// })
+			gaussianSplats.lastloadedCount = gaussianSplats.loadedCount;
+		}
+	}
 
 	const loadTime = `${((performance.now() - start) / 1000).toFixed(3)}s`
 	progressTextDom.innerHTML = ``;
-	reloadLod = false;
 	console.log(`[Loader] load ${gaussianSplats.extraVertexCount} gaussians in ${loadTime}.`)
 }
 // read gaussian data from octree node
@@ -2043,43 +2060,16 @@ async function readGaussianFromNode(node, gaussianSplats, campos, level) {
 	}
 }
 
-function markCubeVisibility(viewMatrix, projectionMatrix, node) {
-	// get 8 boundary points of the cube
-	const pmin = node.boundingBox.min;
-	const pmax = node.boundingBox.max;
-	const p000 = [pmin.x, pmin.y, pmin.z];
-	const p001 = [pmin.x, pmin.y, pmax.z];
-	const p010 = [pmin.x, pmax.y, pmin.z];
-	const p011 = [pmin.x, pmax.y, pmax.z];
-	const p100 = [pmax.x, pmin.y, pmin.z];
-	const p101 = [pmax.x, pmin.y, pmax.z];
-	const p110 = [pmax.x, pmax.y, pmin.z];
-	const p111 = [pmax.x, pmax.y, pmax.z];
-	const points = [p000, p001, p010, p011, p100, p101, p110, p111];
 
+function markCubeVisibility(viewMatrix, projectionMatrix, centerPos) {
+	const x = centerPos.x;
+	const y = centerPos.y;
+	const z = centerPos.z;
 
-	const center = [node.boundingSphere.center.x, node.boundingSphere.center.y, node.boundingSphere.center.z];
-	const { ZDepth, visibility } = markPointVisibility(viewMatrix, projectionMatrix, center);
-
-	if  (visibility) return { ZDepth, visibility };
-
-	for (let i = 0; i < 8; i++) {
-		const { ZDepth, visibility } = markPointVisibility(viewMatrix, projectionMatrix, points[i]);
-		if (visibility) return { ZDepth, visibility };
-	}
-
-	return {ZDepth, visibility};
-}
-
-function markPointVisibility(viewMatrix, projectionMatrix, centerPos) {
-	const x = centerPos[0];
-	const y = centerPos[1];
-	const z = centerPos[2];
-
-	// Convert to camera space
+	// Convert to camara space
 	const ZDepth = x * viewMatrix[2] + y * viewMatrix[6] + z * viewMatrix[10] + viewMatrix[14];
 
-	// Get View Projection Matrix
+	//Get View Projection Matrix
 	const viewProjMatrix = multiply4(projectionMatrix, viewMatrix);
 
 	// Convert to clip space
@@ -2094,16 +2084,15 @@ function markPointVisibility(viewMatrix, projectionMatrix, centerPos) {
 
 	let visibility = false;
 	// Check if the point is within the camera's field of view
-	if (ZDepth > -2 && clipX > -1.5 && clipX < 1.5 && clipY > -1.5 && clipY < 1.5) {
+	if (ZDepth > -0.5 && clipX > -1.3 && clipX < 1.3 && clipY > -1.3 && clipY < 1.3) { //  
 		visibility = true;
 	}
-
 	return { ZDepth, visibility };
 }
 
 function isBufferLargeEnough(buffer, offset, length, byteSize) {
 	let requiredBytes = length * byteSize;
-	return buffer.byteLength >= offset + requiredBytes;
+	return buffer.byteLength >= (offset + requiredBytes);
 }
 
 function computeColorFromSH(deg, position, campos, harmonic) {

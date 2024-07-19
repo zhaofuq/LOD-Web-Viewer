@@ -143,23 +143,40 @@ onmessage = async function (event) {
 				
 				let pointOffset = j * bytesPerPoint;
 
-				let x = (view.getInt32(pointOffset + attributeOffset + 0, true) * scale[0]) + offset[0] - min.x;
-				let y = (view.getInt32(pointOffset + attributeOffset + 4, true) * scale[1]) + offset[1] - min.y;
-				let z = (view.getInt32(pointOffset + attributeOffset + 8, true) * scale[2]) + offset[2] - min.z;
+				if (scale[0] === 1 && scale[1] === 1 && scale[2] === 1) {
+					
+					let x = view.getFloat32(pointOffset + attributeOffset + 0, true) - min.x;
+					let y = view.getFloat32(pointOffset + attributeOffset + 4, true) - min.y;
+					let z = view.getFloat32(pointOffset + attributeOffset + 8, true) - min.z;
 
-				let index = toIndex(x, y, z);
-				let count = grid[index]++;
-				if(count === 0){
-					numOccupiedCells++;
+					let index = toIndex(x, y, z);
+					let count = grid[index]++;
+					if(count === 0){
+						numOccupiedCells++;
+					}
+
+					positions[3 * j + 0] = x;
+					positions[3 * j + 1] = y;
+					positions[3 * j + 2] = z;
+				} else {
+					let x = (view.getInt32(pointOffset + attributeOffset + 0, true) * scale[0]) + offset[0] - min.x;
+					let y = (view.getInt32(pointOffset + attributeOffset + 4, true) * scale[1]) + offset[1] - min.y;
+					let z = (view.getInt32(pointOffset + attributeOffset + 8, true) * scale[2]) + offset[2] - min.z;
+
+					let index = toIndex(x, y, z);
+					let count = grid[index]++;
+					if(count === 0){
+						numOccupiedCells++;
+					}
+
+					positions[3 * j + 0] = x;
+					positions[3 * j + 1] = y;
+					positions[3 * j + 2] = z;
 				}
-
-				positions[3 * j + 0] = x;
-				positions[3 * j + 1] = y;
-				positions[3 * j + 2] = z;
 			}
 
 			attributeBuffers[pointAttribute.name] = { buffer: buff, attribute: pointAttribute };
-		}else if(/^(f_dc_\d|f_rest_\d{1,2}|opacity|scale_\d|rot_\d)$/.test(pointAttribute.name)){ 
+		}else if(/^(f_dc_\d|opacity|scale_\d|rot_\d)$/.test(pointAttribute.name)){ //f_rest_\d{1,2}|
 			let buff = new ArrayBuffer(numPoints * 4);
 			let f32 = new Float32Array(buff);
 
@@ -188,12 +205,13 @@ onmessage = async function (event) {
 				offset = amin;
 				scale = 1 / (amax - amin);
 			}
-
+			
 			for(let j = 0; j < numPoints; j++){
 				let pointOffset = j * bytesPerPoint;
 				let value = getter(pointOffset + attributeOffset, true);
 
 				f32[j] = (value - offset) * scale;
+				// f32[j] = value;
 				preciseBuffer[j] = value;
 			}
 
@@ -242,6 +260,8 @@ onmessage = async function (event) {
 					let value = getter(j * 4, true);
 
 					f32[j * numVectorElements + iElement] = (value / scale) + offset;
+					// f32[j * numVectorElements + iElement] = value
+
 				}
 
 				iElement++;

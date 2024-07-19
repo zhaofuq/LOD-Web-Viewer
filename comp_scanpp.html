@@ -131,7 +131,7 @@
 			left: 20px;
 			bottom: 80px;
 			transition: all 0.2s ease-in-out;
-			display: none;
+			opacity: 0;
 			z-index: 9998;
 		}
 
@@ -211,23 +211,22 @@
 	<script src="./src/public.js"></script>
 	<script>
 		var dataSource = {
-			name: 'ikea',
-			size: 4500,
-			octreeUrl: './model/IKEA/octree.bin' ,
-			metaData: './model/IKEA/metadata.json',
-			baseLODLevel: 4,
-			maxLODLevel: 7,
-			initLoadTime: 5000,
+			name: 'comp_scanpp',
+			size: 1000,
+			octreeUrl: './model/comp/scanpp/octree.bin' ,
+			metaData: './model/comp/scanpp/metadata.json',
+			baseLODLevel: 2,
+			maxLODLevel: 2,
+			initLoadTime: 1000,
 
-			defaultViewMatrix:[0.9971778641277294, -0.0008238595704794971, 0.07507082355578719, -0, -0.0746642332784816, -0.1153848008478178, 0.9905107773276504, 0, 0.007845990241916814, -0.9933205268132507, -0.11512068210537642, 0, 32.421191640028425, -10.800353100613576, 47.78086485404852, 1.0000000000006066],
+			defaultViewMatrix: [-0.3906770287428409, -0.27466175043891944, 0.8785968256592416, 0, -0.9202645718081487, 0.13935889869897372, -0.365639460709826, 0, -0.022013111716183194, -0.9513884696585506, -0.3072057986323391, 0, 4.120520604157586, 1.5787743766371352, 0.6098649105908928, 0.999999999999997],
 		   
-			trajectory: './model/original/output.json',
+			trajectory: './model/comp/scanpp/output.json',
 		   
 		}
 
 		var dataParameter = {
 			n: 1.3,
-			depthMax: 100
 		}
 		let chunks;
 

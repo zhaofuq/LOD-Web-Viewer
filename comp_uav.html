@@ -165,11 +165,10 @@
 				<div id="instructions">
 					- W/S arrow keys to move forward/back
 					- A/D arrow keys to move left/right
-					- space to jump
+					- space to play the video (if available)
 
 					camera angle (wasd)
 					- q/e to roll camera counterclockwise/clockwise
-					- i/k and j/l to orbit
 
 					trackpad
 					- scroll up/down/left/right to orbit
@@ -187,13 +186,8 @@
 					- two finger rotate to rotate camera clockwise/counterclockwise
 					- two finger pan to move side-to-side and up-down
 
-					gamepad
-					- if you have a game controller connected it should work
-
 					other
-					- press 0-9 to switch to one of the pre-loaded camera views
 					- press p to resume default animation
-					- drag and drop .ply file to convert to .splat
 				</div>
 			</h4>
 
@@ -216,15 +210,26 @@
 	<canvas id="canvas"></canvas>
 	<script src="./src/public.js"></script>
 	<script>
-
 		var dataSource = {
-			name: 'ShoppingMall2',
-			size: 993,
-			octreeUrl: isLocal ? './model/GON/octree.bin' : 'https://neudim.oss-cn-shanghai.aliyuncs.com/splat/gon/octree.bin',
-			metaData: './model/GON/metadata.json',
-			defaultViewMatrix: [-0.7163110866061403, 0.15966788529330836, -0.6757918271266856, 0, 0.6834499873774144, 0.04079016305127989, -0.723110141923274, 0, -0.08703864312367983, -0.9906413356981333, -0.13491856288062806, 0, -63.12476844805417, -0.6380135705551785, 222.27837921271302, 0.9999999999999447]
+			name: 'comp_uav',
+			size: 1000,
+			octreeUrl: './model/comp/uav/octree.bin' ,
+			metaData: './model/comp/uav/metadata.json',
+			baseLODLevel: 6,
+			maxLODLevel: 6,
+			initLoadTime: 3000,
+
+			defaultViewMatrix:[0.463113522842085, 0.042655935202367254, 0.8852718995612585, -0, -0.8853998481056906, 0.06724629978727363, 0.45994026148979633, 0, -0.03991207756007685, -0.996824160199254, 0.06891022934156414, 0, 4.251074384247045, 1.8056947540124342, 25.530629562287668, 1.0000000000000875],
+		   
+			trajectory: './model/comp/uav/output.json',
+		   
+		}
+
+		var dataParameter = {
+			n: 1.3,
 		}
 		let chunks;
+
 	</script>
 
 

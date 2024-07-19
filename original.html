@@ -165,11 +165,10 @@
 				<div id="instructions">
 					- W/S arrow keys to move forward/back
 					- A/D arrow keys to move left/right
-					- space to jump
+					- space to play the video (if available)
 
 					camera angle (wasd)
 					- q/e to roll camera counterclockwise/clockwise
-					- i/k and j/l to orbit
 
 					trackpad
 					- scroll up/down/left/right to orbit
@@ -187,13 +186,8 @@
 					- two finger rotate to rotate camera clockwise/counterclockwise
 					- two finger pan to move side-to-side and up-down
 
-					gamepad
-					- if you have a game controller connected it should work
-
 					other
-					- press 0-9 to switch to one of the pre-loaded camera views
 					- press p to resume default animation
-					- drag and drop .ply file to convert to .splat
 				</div>
 			</h4>
 
@@ -216,15 +210,26 @@
 	<canvas id="canvas"></canvas>
 	<script src="./src/public.js"></script>
 	<script>
-
 		var dataSource = {
-			name: 'Campus1',
-			size: 4147,
-			octreeUrl: isLocal ? './model/sem/octree.bin' : 'https://neudim.oss-cn-shanghai.aliyuncs.com/splat/sem/octree.bin',// 
-			metaData: './model/sem/metadata.json',
-			defaultViewMatrix: [-0.98314053197243, -0.0029321482489683003, 0.16945824529843467, 0, -0.17470896364120989, 0.030488678741704738, -0.9798995961281175, 0, 0.0026702402852754464, -1.0031365983504823, -0.029305884508546126, 0, 101.88600308684015, 184.5208222018683, 92.8224866614811, 0.9999999999999418]
+			name: 'original',
+			size: 1000,
+			octreeUrl: './model/original/octree.bin' ,
+			metaData: './model/original/metadata.json',
+			baseLODLevel: 0,
+			maxLODLevel: 0,
+			initLoadTime: 5000,
+
+			defaultViewMatrix:[0.6997234156992427, 0.01576133554958122, 0.7142399609542639, 0, -0.7141709894264169, -0.01063382088093671, 0.6998905055186142, 0, 0.018626308916241903, -0.999819234739546, 0.003815555135382259, 0, 5.217162506949099, 0.01490194827474991, -8.450579614039917, 1.0000000000001406],
+		   
+			trajectory: './model/original/demo.json',
+		   
+		}
+
+		var dataParameter = {
+			n: 1.3,
 		}
 		let chunks;
+
 	</script>
 
 
@@ -232,6 +237,7 @@
 	<script type="module" src="src/gl-matrix-min.js"></script>
 	<script src="src/lil-gui@0.18"></script>
 	<script src="src/localforage.min.js"></script>
+
 
 	<!-- Custom -->
 	<script type="module" src="src/gaussian-utils/DecoderWorker.js"></script>

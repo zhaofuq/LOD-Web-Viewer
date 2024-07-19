@@ -50,35 +50,31 @@ fetchCameras().then(fetchedCameras => {
 });
 
 let reloadLod = false;
-let update_count = 0;
-// let default_status = false;
 
 const startReloadLod = () => {
-	const tempid = setTimeout(() => {
+	setTimeout(() => {
 		if (!reloadLod) {
-			reloadLod = true;
+			reloadLod = true
 		}
-		update_count = 0;
-		// default_status = false;
-
-		clearTimeout(tempid);
+		setTimeout(() => {
+			reloadLod = false;
+		}, 1000);
 	}, 10);
-
 
 };
 
-// let reloadDefault = false;
+let reloadDefault = false;
 
-// const startReloadDefault = () => {
-// 	const tempid = setTimeout(() => {
-// 		if (!reloadDefault && !default_status) {
-// 			reloadDefault = true;
-// 			default_status = true;
-// 		}
-
-// 		clearTimeout(tempid);
-// 	}, 10);
-// };
+const startReloadDefault = () => {
+	setTimeout(() => {
+		if (!reloadDefault) {
+			reloadDefault = true
+		}
+		setTimeout(() => {
+			reloadDefault = false;
+		}, 1000);
+	}, 10);
+};
 
 function getProjectionMatrix(fx, fy, width, height) {
 	const znear = 0.2;
@@ -375,6 +371,156 @@ function createWorker(self) {
 		]);
 	}
 
+	// function processPlyBuffer(inputBuffer) {
+	// 	const ubuf = new Uint8Array(inputBuffer);
+	// 	// 10KB ought to be enough for a header...
+	// 	const header = new TextDecoder().decode(ubuf.slice(0, 1024 * 10));
+	// 	const header_end = "end_header\n";
+	// 	const header_end_index = header.indexOf(header_end);
+	// 	if (header_end_index < 0)
+	// 		throw new Error("Unable to read .ply file header");
+	// 	const vertexCount = parseInt(/element vertex (\d+)\n/.exec(header)[1]);
+	// 	console.log("Vertex Count", vertexCount);
+	// 	let row_offset = 0,
+	// 		offsets = {},
+	// 		types = {};
+	// 	const TYPE_MAP = {
+	// 		double: "getFloat64",
+	// 		int: "getInt32",
+	// 		uint: "getUint32",
+	// 		float: "getFloat32",
+	// 		short: "getInt16",
+	// 		ushort: "getUint16",
+	// 		uchar: "getUint8",
+	// 	};
+	// 	for (let prop of header
+	// 		.slice(0, header_end_index)
+	// 		.split("\n")
+	// 		.filter((k) => k.startsWith("property "))) {
+	// 		const [p, type, name] = prop.split(" ");
+	// 		const arrayType = TYPE_MAP[type] || "getInt8";
+	// 		types[name] = arrayType;
+	// 		offsets[name] = row_offset;
+	// 		row_offset += parseInt(arrayType.replace(/[^\d]/g, "")) / 8;
+	// 	}
+	// 	console.log("Bytes per row", row_offset, types, offsets);
+
+	// 	let dataView = new DataView(
+	// 		inputBuffer,
+	// 		header_end_index + header_end.length,
+	// 	);
+	// 	let row = 0;
+	// 	const attrs = new Proxy(
+	// 		{},
+	// 		{
+	// 			get(target, prop) {
+	// 				if (!types[prop]) throw new Error(prop + " not found");
+	// 				return dataView[types[prop]](
+	// 					row * row_offset + offsets[prop],
+	// 					true,
+	// 				);
+	// 			},
+	// 		},
+	// 	);
+
+	// 	console.time("calculate importance");
+	// 	let sizeList = new Float32Array(vertexCount);
+	// 	let sizeIndex = new Uint32Array(vertexCount);
+	// 	for (row = 0; row < vertexCount; row++) {
+	// 		sizeIndex[row] = row;
+	// 		if (!types["scale_0"]) continue;
+	// 		const size =
+	// 			Math.exp(attrs.scale_0) *
+	// 			Math.exp(attrs.scale_1) *
+	// 			Math.exp(attrs.scale_2);
+	// 		const opacity = 1 / (1 + Math.exp(-attrs.opacity));
+	// 		sizeList[row] = size * opacity;
+	// 	}
+	// 	console.timeEnd("calculate importance");
+
+	// 	console.time("sort");
+	// 	sizeIndex.sort((b, a) => sizeList[a] - sizeList[b]);
+	// 	console.timeEnd("sort");
+
+	// 	// 6*4 + 4 + 4 = 8*4
+	// 	// XYZ - Position (Float32)
+	// 	// XYZ - Scale (Float32)
+	// 	// RGBA - colors (uint8)
+	// 	// IJKL - quaternion/rot (uint8)
+	// 	const rowLength = 3 * 4 + 3 * 4 + 4 + 4;
+	// 	const buffer = new ArrayBuffer(rowLength * vertexCount);
+
+	// 	console.time("build buffer");
+
+	// 	for (let j = 0; j < vertexCount; j++) {
+	// 		row = sizeIndex[j];
+
+	// 		const position = new Float32Array(buffer, j * rowLength, 3);
+	// 		const scales = new Float32Array(buffer, j * rowLength + 4 * 3, 3);
+	// 		const rgba = new Uint8ClampedArray(
+	// 			buffer,
+	// 			j * rowLength + 4 * 3 + 4 * 3,
+	// 			4,
+	// 		);
+	// 		const rot = new Uint8ClampedArray(
+	// 			buffer,
+	// 			j * rowLength + 4 * 3 + 4 * 3 + 4,
+	// 			4,
+	// 		);
+
+	// 		if (types["scale_0"]) {
+	// 			const qlen = Math.sqrt(
+	// 				attrs.rot_0 ** 2 +
+	// 				attrs.rot_1 ** 2 +
+	// 				attrs.rot_2 ** 2 +
+	// 				attrs.rot_3 ** 2,
+	// 			);
+	// 			console.log("scale", attrs.scale_0, attrs.scale_1, attrs.scale_2);
+	// 			rot[0] = (attrs.rot_0 / qlen) * 128 + 128;
+	// 			rot[1] = (attrs.rot_1 / qlen) * 128 + 128;
+	// 			rot[2] = (attrs.rot_2 / qlen) * 128 + 128;
+	// 			rot[3] = (attrs.rot_3 / qlen) * 128 + 128;
+
+	// 			scales[0] = Math.exp(attrs.scale_0);
+	// 			scales[1] = Math.exp(attrs.scale_1);
+	// 			scales[2] = Math.exp(attrs.scale_2);
+	// 		} else {
+	// 			scales[0] = 0.01;
+	// 			scales[1] = 0.01;
+	// 			scales[2] = 0.01;
+
+	// 			rot[0] = 255;
+	// 			rot[1] = 0;
+	// 			rot[2] = 0;
+	// 			rot[3] = 0;
+	// 		}
+
+	// 		position[0] = attrs.x;
+	// 		position[1] = attrs.y;
+	// 		position[2] = attrs.z;
+
+	// 		if (types["f_dc_0"]) {
+	// 			const SH_C0 = 0.28209479177387814;
+	// 			rgba[0] = (0.5 + SH_C0 * attrs.f_dc_0) * 255;
+	// 			rgba[1] = (0.5 + SH_C0 * attrs.f_dc_1) * 255;
+	// 			rgba[2] = (0.5 + SH_C0 * attrs.f_dc_2) * 255;
+	// 			// color = computeColorFromSH(settings.shDegree, position, campos, [attrs.f_dc_0, attrs.f_dc_1, attrs.f_dc_2, attrs.f_rest_0, attrs.f_rest_1, attrs.f_rest_2, attrs.f_rest_3, attrs.f_rest_4, attrs.f_rest_5, attrs.f_rest_6, attrs.f_rest_7, attrs.f_rest_8]);
+
+	// 		} else {
+	// 			rgba[0] = attrs.red;
+	// 			rgba[1] = attrs.green;
+	// 			rgba[2] = attrs.blue;
+	// 		}
+	// 		if (types["opacity"]) {
+	// 			rgba[3] = (1 / (1 + Math.exp(-attrs.opacity))) * 255;
+	// 		} else {
+	// 			rgba[3] = 255;
+	// 		}
+	// 	}
+	// 	console.timeEnd("build buffer");
+	// 	return buffer;
+	// }
+
 	const throttledSort = () => {
 		if (!sortRunning) {
 			sortRunning = true;
@@ -532,6 +678,18 @@ function initGUI(resize) {
 			}
 		})
 
+	// gui.add(settings, 'depthMax', 5, 200, 1).name('Depth Max').listen()
+	// 	.onChange(async value => {
+	// 		try {
+	// 			stopReading = true;
+	// 			settings.poseId = settings.depthMax;
+				
+	// 			await updateGaussianByView(viewMatrix, projectionMatrix, settings.lodLevel, settings.maxGaussians)
+	// 		} catch (error) {
+	// 			throw error
+	// 		}
+	// 	})
+
 	gui.add(settings, 'maxGaussians', 1e4, 1e7, 10000).name('Ext Gaussians')
 		.onChange(async value => {
 			try {
@@ -541,6 +699,16 @@ function initGUI(resize) {
 				throw error
 			}
 		})
+
+	// gui.add(settings, 'scalingBeta', 1, 16, 1).name('scalingBeta')
+	// 	.onChange(async value => {
+	// 		try {
+	// 			stopReading = true;
+	// 			await updateGaussianByView(viewMatrix, projectionMatrix, settings.lodLevel, settings.maxGaussians)
+	// 		} catch (error) {
+	// 			throw error
+	// 		}
+	// 	})
 
 	let controller = gui.add(settings, 'shDegree', 0, 2, 1).name('SH Degree')
 		.onChange(async value => {
@@ -956,8 +1124,7 @@ async function main() {
 		{ passive: false },
 	);
 
-	let startX, startY;
-	let down = false;
+	let startX, startY, down;
 	canvas.addEventListener("mousedown", (e) => {
 		carousel = false;
 		// e.preventDefault();
@@ -1011,7 +1178,7 @@ async function main() {
 		}
 	});
 	canvas.addEventListener("mouseup", (e) => {
-		// e.preventDefault();
+		e.preventDefault();
 		console.log(viewMatrix)
 		startReloadLod();
 		down = false;
@@ -1273,39 +1440,37 @@ async function main() {
 				carousel = true;
 			}
 		}
-	{
-		// if (
-		// 	["KeyJ", "KeyK", "KeyL", "KeyI"].some((k) => activeKeys.includes(k))
-		// ) {
-		// 	startReloadDefault();
-		// 	let d = 4;
-		// 	inv = translate4(inv, 0, 0, d);
-		// 	inv = rotate4(
-		// 		inv,
-		// 		activeKeys.includes("KeyJ")
-		// 			? -0.05
-		// 			: activeKeys.includes("KeyL")
-		// 				? 0.05
-		// 				: 0,
-		// 		0,
-		// 		1,
-		// 		0,
-		// 	);
-		// 	inv = rotate4(
-		// 		inv,
-		// 		activeKeys.includes("KeyI")
-		// 			? 0.05
-		// 			: activeKeys.includes("KeyK")
-		// 				? -0.05
-		// 				: 0,
-		// 		1,
-		// 		0,
-		// 		0,
-		// 	);
-		// 	inv = translate4(inv, 0, 0, -d);
-		// }
 
-	}
+		if (
+			["KeyJ", "KeyK", "KeyL", "KeyI"].some((k) => activeKeys.includes(k))
+		) {
+			startReloadDefault();
+			let d = 4;
+			inv = translate4(inv, 0, 0, d);
+			inv = rotate4(
+				inv,
+				activeKeys.includes("KeyJ")
+					? -0.05
+					: activeKeys.includes("KeyL")
+						? 0.05
+						: 0,
+				0,
+				1,
+				0,
+			);
+			inv = rotate4(
+				inv,
+				activeKeys.includes("KeyI")
+					? 0.05
+					: activeKeys.includes("KeyK")
+						? -0.05
+						: 0,
+				1,
+				0,
+				0,
+			);
+			inv = translate4(inv, 0, 0, -d);
+		}
 
 		viewMatrix = invert4(inv);
 
@@ -1320,8 +1485,8 @@ async function main() {
 		}
 
 		if (videoPlay) {
- 			const t = Math.max((Date.now() - start) / 50, 0 );
-			let i = Math.round(t) + 50;
+ 			const t = Math.max((Date.now() - start) / 20, 0 );
+			let i = Math.round(t);
 			if (i >= cameras.length - 1) {
 				videoPlay = false;
 			} else {
@@ -1329,9 +1494,7 @@ async function main() {
 				settings.poseId = i;
 			}
 
-			if (i % 100 == 0) {
-				update_count = 0;
-				reloadLod = true;
+			if (i % 200 == 0) {
 				updateGaussianByView(viewMatrix, projectionMatrix, settings.lodLevel, settings.maxGaussians)
 					.catch(error => {
 						throw error;
@@ -1353,15 +1516,13 @@ async function main() {
 			lastViewProj[6] / lastViewProjNorm * viewProj[6] / viewProjNorm +
 			lastViewProj[10] / lastViewProjNorm * viewProj[10] / viewProjNorm;
 
-		// if (reloadDefault && settings.renderingMode == "Octree" && Math.abs(dot - 1) > 0.001) {
-		// 	stopReading = true;
-		// 	updateGaussianDefault(settings.lodLevel);
-		// 	reloadDefault = false;
-		// }
+		if (reloadDefault && settings.renderingMode == "Octree" && Math.abs(dot - 1) > 0.001) {
+			stopReading = true;
+			updateGaussianDefault(settings.lodLevel);
+		}
 
-		// if ((reloadLod || activeKeys.includes("ControlLeft")) && settings.renderingMode == "Octree" && Math.abs(dot - 1) > 0.001) {
-		if ((reloadLod || activeKeys.includes("ControlLeft")) && settings.renderingMode == "Octree" ) {
-			reloadLod = false;
+
+		if ((reloadLod || activeKeys.includes("ControlLeft")) && settings.renderingMode == "Octree" && Math.abs(dot - 1) > 0.001) {
 			// console.log(viewMatrix)
 			stopReading = true;
 			updateGaussianByView(viewMatrix, projectionMatrix, settings.lodLevel, settings.maxGaussians);
@@ -1381,6 +1542,13 @@ async function main() {
 			// document.getElementById("spinner").style.display = "";
 			start = Date.now() + 2000;
 		}
+		// const progress = (100 * vertexCount) / (splatData.length / rowLength);
+		// if (progress < 80) {
+		// 	document.getElementById("progress").style.width = progress + "%";
+		// } else {
+		// 	document.getElementById("progress").style.display = "none";
+		// 	document.getElementById("spinner").style.display = "none";
+		// }
 
 		settings.fps = Math.round(avgFps)
 		lastFrame = now;
@@ -1397,7 +1565,6 @@ async function main() {
 				for (let i = 0; i < cameras.length; i++) {
 					viewMatrix = cameras[i].viewMatrix;
 					settings.poseId = i;
-					reloadLod = true;
 					await updateGaussianByView(viewMatrix, projectionMatrix, settings.lodLevel, settings.maxGaussians);
 					// wait 0.5 second
 					await new Promise(resolve => setTimeout(resolve, 1500));
@@ -1486,6 +1653,26 @@ async function main() {
 	let lastVertexCount = -1;
 	let stopLoading = false;
 
+	// while (true) {
+	// 	const { done, value } = await reader.read();
+	// 	if (done || stopLoading) break;
+
+	// 	splatData.set(value, bytesRead);
+	// 	bytesRead += value.length;
+
+	// 	if (vertexCount > lastVertexCount) {
+	// 		// worker.postMessage({
+	// 		// 	buffer: splatData.buffer,
+	// 		// 	vertexCount: Math.floor(bytesRead / rowLength),
+	// 		// });
+	// 		lastVertexCount = vertexCount;
+	// 	}
+	// }
+	// if (!stopLoading)
+	// 	worker.postMessage({
+	// 		buffer: splatData.buffer,
+	// 		vertexCount: Math.floor(bytesRead / rowLength),
+	// 	});
 }
 
 main().catch((err) => {
@@ -1848,9 +2035,6 @@ async function updateGaussianDefault(maxLevel) {
 }
 
 async function updateGaussianByView(viewMatrix, projectionMatrix, maxLevel, maxCount) {
-	update_count += 1;
-	if (update_count > 1) return;
-
 	const start = performance.now();
 	let ZDepthMax = settings.depthMax;
 	
@@ -1867,9 +2051,8 @@ async function updateGaussianByView(viewMatrix, projectionMatrix, maxLevel, maxC
 	for (let base_index = 0; base_index < baseLevelQueue.length; base_index++) {
 		// console.log(baseLevelQueue[base_index].node);
 		let queue = [];
-		
-		let {ZDepth, visibility} = markCubeVisibility(viewMatrix, projectionMatrix, baseLevelQueue[base_index].node);
-		queue.push({ node: baseLevelQueue[base_index].node, level: baseLevelQueue[base_index].level, ZDepth: ZDepth, visibility: visibility });
+		queue.push({ node: baseLevelQueue[base_index].node, level: baseLevelQueue[base_index].level });
+		let {ZDepth, visibility} = markCubeVisibility(viewMatrix, projectionMatrix, baseLevelQueue[base_index].node)
 
 		if (!visibility) {
 			queue.pop();
@@ -1877,11 +2060,13 @@ async function updateGaussianByView(viewMatrix, projectionMatrix, maxLevel, maxC
 
 		//first loop
 		while (queue.length > 0) {
-			const { node, level, ZDepth, visibility } = queue.shift();
+			const { node, level } = queue.shift();
 			node.reading = false;
 
 			if (level <= maxLevel) { // reduce some level to avoid too many children
 				// set the children of the current node
+
+				let { ZDepth, visibility } = markCubeVisibility(viewMatrix, projectionMatrix, node)
 
 				{
 					const beta = Math.log(maxLevel + 1)
@@ -1898,6 +2083,7 @@ async function updateGaussianByView(viewMatrix, projectionMatrix, maxLevel, maxC
 
 					if (gaussianSplats.extraVertexCount > maxCount) {
 						// console.log("Stop Reading Gaussian Geometry!", gaussianSplats.extraVertexCount, maxCount)
+						// clean the queue
 						break;
 					}
 
@@ -1907,24 +2093,56 @@ async function updateGaussianByView(viewMatrix, projectionMatrix, maxLevel, maxC
 						for (let cid = 0; cid < 8; cid++) {
 							const child = node.children[cid];
 							if (child) {
-								let { ZDepth, visibility } = markCubeVisibility(viewMatrix, projectionMatrix, child);
-								if (visibility) {
-									queue.push({ node: child, level: level + 1, ZDepth: ZDepth, visibility: visibility });
-								}
+							// 	let {ZDepth, visibility} = markCubeVisibility(viewMatrix, projectionMatrix, child)
+							// 	if (visibility) queue.push({ node: child, level: level + 1 });
+								queue.push({ node: child, level: level + 1 });
 							}
 						}
 					}
 
+					// if (base_level_visibility[base_index]) {
+					// 	base_level_visibility[base_index] = false;
+					// }
 				}
 			}
 		}
 
 	}
+		
+	// console.log(base_level_visibility);
 
-	if (gaussianSplats.extraVertexCount > maxCount) {
-		// console.log("Stop Reading Gaussian Geometry!", gaussianSplats.extraVertexCount, maxCount)
-		return;
-	}
+	
+	// // select base level node according to base_level_visibility
+	// let currentBaseVertexCount = 0;
+	// for (let base_index = 0; base_index < baseLevelQueue.length; base_index++) {
+	// 	const { node, level } = baseLevelQueue[base_index];
+	// 	if (base_level_visibility[base_index]) {
+	// 		currentBaseVertexCount += node.numPoints;	
+	// 	}
+	// }
+
+	// // console.log("currentBaseVertexCount", currentBaseVertexCount)
+	// // console.log("gaussianSplats.baseVertexCount", gaussianSplats.baseVertexCount)
+
+	// let currentBaseBuffer = new ArrayBuffer(currentBaseVertexCount * gaussianSplats.rowLength);
+
+	// // copy ArrayBuffer to another ArrayBuffer
+	// let srcView = new Uint8Array(gaussianSplats.baseBuffer);
+	// let dstView = new Uint8Array(currentBaseBuffer);
+	// let srcIndex = 0;
+	// let dstIndex = 0;
+	// for (let i = 0; i < baseLevelQueue.length; i++) {
+	// 	const { node, level } = baseLevelQueue[i];
+	// 	if (base_level_visibility[i]) {
+	// 		const currentCount = node.numPoints;
+	// 		const srcLength = currentCount * gaussianSplats.rowLength;
+	// 		const dstLength = currentCount * gaussianSplats.rowLength;
+	// 		dstView.set(srcView.slice(srcIndex, srcIndex + srcLength), dstIndex);
+	// 		srcIndex += srcLength;
+	// 		dstIndex += dstLength;
+	// 	}
+
+	// }
 
 	// Send gaussian data to the worker
 	
@@ -1953,7 +2171,6 @@ async function updateGaussianByView(viewMatrix, projectionMatrix, maxLevel, maxC
 			// 	buffer: buffer,
 			// 	vertexCount: currentBaseVertexCount + gaussianSplats.extraVertexCount,
 			// })
-			// console.log(gaussianSplats.extraVertexCount);
 			worker.postMessage({
 				buffer: gaussianSplats.extraBuffer,
 				vertexCount: gaussianSplats.extraVertexCount,
@@ -1964,7 +2181,6 @@ async function updateGaussianByView(viewMatrix, projectionMatrix, maxLevel, maxC
 
 	const loadTime = `${((performance.now() - start) / 1000).toFixed(3)}s`
 	progressTextDom.innerHTML = ``;
-	reloadLod = false;
 	console.log(`[Loader] load ${gaussianSplats.extraVertexCount} gaussians in ${loadTime}.`)
 }
 // read gaussian data from octree node
