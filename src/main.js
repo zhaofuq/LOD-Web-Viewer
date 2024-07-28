@@ -54,17 +54,19 @@ let update_count = 0;
 // let default_status = false;
 
 const startReloadLod = () => {
-	const tempid = setTimeout(() => {
-		if (!reloadLod) {
-			reloadLod = true;
-		}
-		update_count = 0;
-		// default_status = false;
+	// const tempid = setTimeout(() => {
+	// 	if (!reloadLod) {
+	// 		reloadLod = true;
+	// 	}
+	// 	// default_status = false;
 
-		clearTimeout(tempid);
-	}, 10);
+	// 	clearTimeout(tempid);
+	// }, 10);
 
 
+	if (!reloadLod) {
+		reloadLod = true;
+	}
 };
 
 // let reloadDefault = false;
@@ -1330,12 +1332,12 @@ async function main() {
 			}
 
 			if (i % 100 == 0) {
-				update_count = 0;
 				reloadLod = true;
 				updateGaussianByView(viewMatrix, projectionMatrix, settings.lodLevel, settings.maxGaussians)
 					.catch(error => {
 						throw error;
 					});
+				reloadLod = false;
 				}
  
 
@@ -1416,6 +1418,7 @@ async function main() {
 	};
 
 	frame();
+	// requestAnimationFrame(frame);
 
 	const selectFile = (file) => {
 		const fr = new FileReader();
@@ -1839,8 +1842,7 @@ async function mergeChunks(data) {
 getFileData()
 // fetchSetFile(dataSource.octreeUrl)
 
-async function updateGaussianDefault(maxLevel) {
-	if (maxLevel === settings.baseLevel) return;
+async function updateGaussianDefault() {
 	worker.postMessage({
 		buffer: gaussianSplats.baseBuffer,
 		vertexCount: gaussianSplats.baseVertexCount,
@@ -1848,22 +1850,24 @@ async function updateGaussianDefault(maxLevel) {
 }
 
 async function updateGaussianByView(viewMatrix, projectionMatrix, maxLevel, maxCount) {
+	console.log(update_count, maxLevel);
 	update_count += 1;
 	if (update_count > 1) return;
 
 	const start = performance.now();
-	let ZDepthMax = settings.depthMax;
-	
+
 	stopReading = false;
 	gaussianSplats.extraVertexCount = 0;
 
-	updateGaussianDefault(maxLevel);
+	updateGaussianDefault();
+	if (maxLevel === settings.baseLevel) { 
+		update_count = 0;
+		return; 
+	}
 
-	if (maxLevel === settings.baseLevel) return;
+	let ZDepthMax = settings.depthMax;
 
-	// queue.push({ node: octreeGeometry.root, level: 0 });
-	let base_level_visibility = new Array(baseLevelQueue.length).fill(true);
-
+	let isOverMaxLimit = false;
 	for (let base_index = 0; base_index < baseLevelQueue.length; base_index++) {
 		// console.log(baseLevelQueue[base_index].node);
 		let queue = [];
@@ -1875,8 +1879,15 @@ async function updateGaussianByView(viewMatrix, projectionMatrix, maxLevel, maxC
 			queue.pop();
 		}
 
+		if (queue.length > 0 && isOverMaxLimit) {
+			const { node, level, ZDepth, visibility } = queue.shift();
+			node.visibility = visibility;
+			await octreeGeometryLoader.load(node, octreeFileUrl); // load gau point cloud
+			gaussianSplats.extraVertexCount += node.numPoints;
+		}
+		
 		//first loop
-		while (queue.length > 0) {
+		while (queue.length > 0 && !isOverMaxLimit) {
 			const { node, level, ZDepth, visibility } = queue.shift();
 			node.reading = false;
 
@@ -1897,6 +1908,7 @@ async function updateGaussianByView(viewMatrix, projectionMatrix, maxLevel, maxC
 					gaussianSplats.extraVertexCount += node.numPoints;
 
 					if (gaussianSplats.extraVertexCount > maxCount) {
+						isOverMaxLimit = true;
 						// console.log("Stop Reading Gaussian Geometry!", gaussianSplats.extraVertexCount, maxCount)
 						break;
 					}
@@ -1918,13 +1930,8 @@ async function updateGaussianByView(viewMatrix, projectionMatrix, maxLevel, maxC
 				}
 			}
 		}
-
 	}
 
-	if (gaussianSplats.extraVertexCount > maxCount) {
-		// console.log("Stop Reading Gaussian Geometry!", gaussianSplats.extraVertexCount, maxCount)
-		return;
-	}
 
 	// Send gaussian data to the worker
 	
@@ -1932,40 +1939,19 @@ async function updateGaussianByView(viewMatrix, projectionMatrix, maxLevel, maxC
 	gaussianSplats.loadedCount = 0;
 	gaussianSplats.lastloadedCount = 0;
 
-	let maxLoop = 64;
 	let campos = [viewMatrix[2], viewMatrix[6], viewMatrix[10]];
-	// load gaussian data into buffer
-	// while (true) {
-	// 	if (gaussianSplats.loadedCount >= gaussianSplats.extraVertexCount || stopReading || maxLoop-- <= 0) {
-	// 		console.log("Stop Reading Gaussian Geometry!", gaussianSplats.loadedCount, gaussianSplats.extraVertexCount, maxLoop)
-	// 		break;
-	// 	}
-		await readGaussianFromNode(octreeGeometry.root, gaussianSplats, campos, 0); // put something to extrabuffer
-		// Send gaussianSplats data to the worker
-		// if (gaussianSplats.loadedCount > gaussianSplats.lastloadedCount + 200000 || gaussianSplats.loadedCount == gaussianSplats.extraVertexCount) {
-		// 	if (gaussianSplats.loadedCount == gaussianSplats.extraVertexCount) stopReading = true;
-			// let buffer = new ArrayBuffer(currentBaseBuffer.byteLength + gaussianSplats.extraBuffer.byteLength);
-			// let bufferView = new Uint8Array(buffer);
-			// bufferView.set(new Uint8Array(currentBaseBuffer), 0);
-			// bufferView.set(new Uint8Array(gaussianSplats.extraBuffer), currentBaseBuffer.byteLength);
+	await readGaussianFromNode(octreeGeometry.root, gaussianSplats, campos, 0); // put something to extrabuffer
 
-			// worker.postMessage({
-			// 	buffer: buffer,
-			// 	vertexCount: currentBaseVertexCount + gaussianSplats.extraVertexCount,
-			// })
-			// console.log(gaussianSplats.extraVertexCount);
-			worker.postMessage({
-				buffer: gaussianSplats.extraBuffer,
-				vertexCount: gaussianSplats.extraVertexCount,
-			})
-	// 		gaussianSplats.lastloadedCount = gaussianSplats.loadedCount;
-	// 	}
-	// }
+	worker.postMessage({
+		buffer: gaussianSplats.extraBuffer,
+		vertexCount: gaussianSplats.extraVertexCount,
+	})
 
 	const loadTime = `${((performance.now() - start) / 1000).toFixed(3)}s`
 	progressTextDom.innerHTML = ``;
 	reloadLod = false;
 	console.log(`[Loader] load ${gaussianSplats.extraVertexCount} gaussians in ${loadTime}.`)
+	update_count = 0;
 }
 // read gaussian data from octree node
 async function readGaussianFromNode(node, gaussianSplats, campos, level) {
@@ -2068,7 +2054,7 @@ function markCubeVisibility(viewMatrix, projectionMatrix, node) {
 		if (visibility) return { ZDepth, visibility };
 	}
 
-	return {ZDepth, visibility};
+	return { ZDepth, visibility };
 }
 
 function markPointVisibility(viewMatrix, projectionMatrix, centerPos) {
@@ -2094,7 +2080,7 @@ function markPointVisibility(viewMatrix, projectionMatrix, centerPos) {
 
 	let visibility = false;
 	// Check if the point is within the camera's field of view
-	if (ZDepth > -2 && clipX > -1.5 && clipX < 1.5 && clipY > -1.5 && clipY < 1.5) {
+	if (ZDepth > -3 && clipX > -1.5 && clipX < 1.5 && clipY > -1.5 && clipY < 1.5) {
 		visibility = true;
 	}
 
