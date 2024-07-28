@@ -34,9 +34,9 @@ Checkout this repository's main branch:
 
 ```sh
 ## through HTTPS
-git clone xxx
+git clone https://github.com/NeuDimlabs/LOD-3DGS-Viewer.git
 ## through SSH
-git clone xxx
+git clone git@github.com:NeuDimlabs/LOD-3DGS-Viewer.git
 ```
 
 #### Download the data
@@ -60,9 +60,9 @@ code .
 
 Go Live,
 
-<img src="/Volumes/data/LOD-web-viewer/images/vsc_1.png" alt="vsc_1" style="zoom:33%;" />
+<img src="./images/vsc_1.png" alt="vsc_1" style="zoom:33%;" />
 
-<img src="/Volumes/data/LOD-web-viewer/images/vsc_2.png" alt="vsc_2" style="zoom:33%;" />
+<img src="./images/vsc_2.png" alt="vsc_2" style="zoom:33%;" />
 
 Then, open Chrome on the computer and visit the server, usually at `127.0.0.1:5500`.
 
@@ -80,9 +80,9 @@ Then, open Chrome on the computer and visit the server at `127.0.0.1:8080`.
 
 #### Visualization on computer
 
-<img src="/Volumes/data/LOD-web-viewer/images/chrome_1.png" alt="chrome_1" style="zoom: 25%;" />
+<img src="./images/chrome_1.png" alt="chrome_1" style="zoom: 25%;" />
 
-<img src="/Volumes/data/LOD-web-viewer/images/chrome_2.png" alt="chrome_2" style="zoom: 33%;" />
+<img src="./images/chrome_2.png" alt="chrome_2" style="zoom: 33%;" />
 
 It is recommended to use the `WASDQEIJKL` keys for moving the view horizontally,vertically, forward, backward, and side to side. Click on the webpage using your mouse or touchpad to refresh the view with more details.
 
