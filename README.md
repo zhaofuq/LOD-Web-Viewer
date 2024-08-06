@@ -34,18 +34,13 @@ Checkout this repository's main branch:
 
 ```sh
 ## through HTTPS
-git clone https://github.com/NeuDimlabs/LOD-3DGS-Viewer.git
+git clone https://github.com/zhaofuq/LOD-Web-Viewer.git
 ## through SSH
-git clone git@github.com:NeuDimlabs/LOD-3DGS-Viewer.git
+git clone git@github.com:zhaofuq/LOD-Web-Viewer.git
 ```
 
 #### Download the data
-
-```sh
-cd LOD-web-viewer/model
-## download ...
-...
-```
+Put [small garage sample data](https://drive.google.com/drive/folders/1WWHpzkRPYfVuqx9wP1wMpUM78LK3GlTk?usp=sharing) in `LOD-Web-Viewer`.
 
 ## To run an example
 
@@ -92,7 +87,7 @@ First, obtain your computer's IP address.
 
 Then, open Chrome on the iPad and visit the server at `192.168.xxx.xxx:{your-port}`.
 
-# Citation
+<!-- # Citation
 
 If you find our code or paper helps, please consider citing:
 <section class="section" id="BibTeX">
@@ -114,6 +109,6 @@ If you find our code or paper helps, please consider citing:
 
 
 # Acknowledgements
-
+-->
 
 
