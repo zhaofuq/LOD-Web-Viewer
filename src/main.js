@@ -586,21 +586,21 @@ function initGUI(resize) {
 			}
 		})
 
-		gui.add(settings, 'poseId', 0, 1200, 5).name('Trajectory').listen()
-		.onChange(async value => {
-			try {
-				stopReading = true;
-				if (value > cameras.length - 1 ) value = cameras.length - 1;
-				settings.poseId = value;
+		// gui.add(settings, 'poseId', 0, 1200, 5).name('Trajectory').listen()
+		// .onChange(async value => {
+		// 	try {
+		// 		stopReading = true;
+		// 		if (value > cameras.length - 1 ) value = cameras.length - 1;
+		// 		settings.poseId = value;
 
-				viewMatrix = cameras[value].viewMatrix;
+		// 		viewMatrix = cameras[value].viewMatrix;
 				
-				await updateGaussianByView(viewMatrix, projectionMatrix, settings.lodLevel, settings.maxGaussians)
+		// 		await updateGaussianByView(viewMatrix, projectionMatrix, settings.lodLevel, settings.maxGaussians)
 
-			} catch (error) {
-				throw error
-			}
-		})
+		// 	} catch (error) {
+		// 		throw error
+		// 	}
+		// })
 
 	
 	let intervalId;
@@ -609,88 +609,88 @@ function initGUI(resize) {
 	div.style.display = 'flex'; // 设置 div 为 flex 布局
 	div.style.justifyContent = 'flex-end'; // 将内容对齐到右边
 
-	const addButton = document.createElement('button');
-	addButton.textContent = '+';
-	addButton.style.width = '20px'; // 设置宽度
-	addButton.style.height = '20px'; // 设置高度
-	addButton.style.marginRight = '5px'; // 在右边添加一些空间
-	addButton.addEventListener('mousedown', () => {
-		// 当按钮被按下时，开始连续增加 poseId 的值
-		intervalId = setInterval(() => {
-			settings.poseId += 1;
-			if (settings.poseId > cameras.length - 1) {
-				settings.poseId = cameras.length - 1;
-			}
-			viewMatrix = cameras[settings.poseId].viewMatrix;
-			updateGaussianByView(viewMatrix, projectionMatrix, settings.lodLevel, settings.maxGaussians)
-				.catch(error => {
-					throw error;
-				});
-		}, 10); // 每 10 毫秒增加一次
-	});
-	addButton.addEventListener('mouseup', () => {
-		// 当按钮被松开时，停止增加 poseId 的值
-		clearInterval(intervalId);
-	});
-	addButton.addEventListener('mouseleave', () => {
-		// 当鼠标离开按钮时，停止增加 poseId 的值
-		clearInterval(intervalId);
-	});
+	// const addButton = document.createElement('button');
+	// addButton.textContent = '+';
+	// addButton.style.width = '20px'; // 设置宽度
+	// addButton.style.height = '20px'; // 设置高度
+	// addButton.style.marginRight = '5px'; // 在右边添加一些空间
+	// addButton.addEventListener('mousedown', () => {
+	// 	// 当按钮被按下时，开始连续增加 poseId 的值
+	// 	intervalId = setInterval(() => {
+	// 		settings.poseId += 1;
+	// 		if (settings.poseId > cameras.length - 1) {
+	// 			settings.poseId = cameras.length - 1;
+	// 		}
+	// 		viewMatrix = cameras[settings.poseId].viewMatrix;
+	// 		updateGaussianByView(viewMatrix, projectionMatrix, settings.lodLevel, settings.maxGaussians)
+	// 			.catch(error => {
+	// 				throw error;
+	// 			});
+	// 	}, 10); // 每 10 毫秒增加一次
+	// });
+	// addButton.addEventListener('mouseup', () => {
+	// 	// 当按钮被松开时，停止增加 poseId 的值
+	// 	clearInterval(intervalId);
+	// });
+	// addButton.addEventListener('mouseleave', () => {
+	// 	// 当鼠标离开按钮时，停止增加 poseId 的值
+	// 	clearInterval(intervalId);
+	// });
 
-	const subButton = document.createElement('button');
-	subButton.textContent = '-';
-	subButton.style.width = '20px'; // 设置宽度
-	subButton.style.height = '20px'; // 设置高度
-	subButton.style.marginRight = '4px'; // 在右边添加一些空间
-	subButton.addEventListener('mousedown', () => {
-		// 当按钮被按下时，开始连续减少 poseId 的值
-		intervalId = setInterval(() => {
-			settings.poseId -= 1;
-			if (settings.poseId < 0) {
-				settings.poseId = 0;
-			}
-			viewMatrix = cameras[settings.poseId].viewMatrix;
-			updateGaussianByView(viewMatrix, projectionMatrix, settings.lodLevel, settings.maxGaussians)
-				.catch(error => {
-					throw error;
-				});
-		}, 10); // 每 10 毫秒减少一次
-	});
-	subButton.addEventListener('mouseup', () => {
-		// 当按钮被松开时，停止减少 poseId 的值
-		clearInterval(intervalId);
-	});
-	subButton.addEventListener('mouseleave', () => {
-		// 当鼠标离开按钮时，停止减少 poseId 的值
-		clearInterval(intervalId);
-	});
+	// const subButton = document.createElement('button');
+	// subButton.textContent = '-';
+	// subButton.style.width = '20px'; // 设置宽度
+	// subButton.style.height = '20px'; // 设置高度
+	// subButton.style.marginRight = '4px'; // 在右边添加一些空间
+	// subButton.addEventListener('mousedown', () => {
+	// 	// 当按钮被按下时，开始连续减少 poseId 的值
+	// 	intervalId = setInterval(() => {
+	// 		settings.poseId -= 1;
+	// 		if (settings.poseId < 0) {
+	// 			settings.poseId = 0;
+	// 		}
+	// 		viewMatrix = cameras[settings.poseId].viewMatrix;
+	// 		updateGaussianByView(viewMatrix, projectionMatrix, settings.lodLevel, settings.maxGaussians)
+	// 			.catch(error => {
+	// 				throw error;
+	// 			});
+	// 	}, 10); // 每 10 毫秒减少一次
+	// });
+	// subButton.addEventListener('mouseup', () => {
+	// 	// 当按钮被松开时，停止减少 poseId 的值
+	// 	clearInterval(intervalId);
+	// });
+	// subButton.addEventListener('mouseleave', () => {
+	// 	// 当鼠标离开按钮时，停止减少 poseId 的值
+	// 	clearInterval(intervalId);
+	// });
 
-	const playButton = document.createElement('button');
-	playButton.textContent = '▶';
-	playButton.style.width = '20px'; // 设置宽度
-	playButton.style.height = '20px'; // 设置高度
-	playButton.style.marginRight = '4px'; // 在右边添加一些空间
-	playButton.addEventListener('mousedown', () => {
-		start = Date.now();
-		videoPlay = true;
-	});
+	// const playButton = document.createElement('button');
+	// playButton.textContent = '▶';
+	// playButton.style.width = '20px'; // 设置宽度
+	// playButton.style.height = '20px'; // 设置高度
+	// playButton.style.marginRight = '4px'; // 在右边添加一些空间
+	// playButton.addEventListener('mousedown', () => {
+	// 	start = Date.now();
+	// 	videoPlay = true;
+	// });
 
-	const stopButton = document.createElement('button');
-	stopButton.textContent = '■';
-	stopButton.style.width = '20px'; // 设置宽度
-	stopButton.style.height = '20px'; // 设置高度
-	stopButton.style.marginRight = '4px'; // 在右边添加一些空间
-	stopButton.addEventListener('mousedown', () => {
-		start = Date.now();
-		videoPlay = false;
-	});
+	// const stopButton = document.createElement('button');
+	// stopButton.textContent = '■';
+	// stopButton.style.width = '20px'; // 设置宽度
+	// stopButton.style.height = '20px'; // 设置高度
+	// stopButton.style.marginRight = '4px'; // 在右边添加一些空间
+	// stopButton.addEventListener('mousedown', () => {
+	// 	start = Date.now();
+	// 	videoPlay = false;
+	// });
 
 
-	// 将按钮添加到 div 中
-	div.appendChild(playButton);
-	div.appendChild(stopButton);
-	div.appendChild(addButton);
-	div.appendChild(subButton);
+	// // 将按钮添加到 div 中
+	// div.appendChild(playButton);
+	// div.appendChild(stopButton);
+	// div.appendChild(addButton);
+	// div.appendChild(subButton);
 
 	// 创建一个包含说明文案的HTML元素
 	const description = document.createElement('div');

@@ -211,22 +211,24 @@
 	<script src="./src/public.js"></script>
 	<script>
 		var dataSource = {
-			name: 'big',
-			size: 4300,
-			octreeUrl: './model/big/octree.bin' ,
-			metaData: './model/big/metadata.json',
-			baseLODLevel: 4,
-			maxLODLevel: 6,
-			initLoadTime: 10000,
+			name: 'Test',
+			size: 1300,
+			octreeUrl: './model/small_garage/octree.bin' ,
+			metaData: './model/small_garage/metadata.json',
+			baseLODLevel: 3,
+			maxLODLevel: 5,
+			initLoadTime: 1500,
 
-			defaultViewMatrix:[0.175304363153031, -0.06822605076941614, -0.9821474361091933, 0, 0.9841209947801192, -0.01605143750232311, 0.1767716577595904, -0, -0.027825310285673505, -0.9975407547316445, 0.06432880192408737, 0, 5.271327973149926, -3.9360326147709497, -84.36656355686074, 1.0000000000001834],
+			 //defaultViewMatrix:[0.40726935080468113, 0.13363049868354046, -0.9008687838508207, 0, 0.9113218984207413, -0.05146842290820398, 0.39811982982812366, 0, 0.002885872166830645, -0.9936204134839394, -0.14092248099598967, 0, -24.97995901908817, 3.5210930921923094, -16.23151684135783, 0.999999999999979]
+			defaultViewMatrix:[ -0.893574806389831,-0.026635031874178705,-0.4481234656458386,0.0,0.44582699314313873,0.06421900927079671,-0.89281252849253,0.0,0.05255813514883623,-0.9975803195358951,-0.04550987260296191,0.0,-39.72101045019363,-3.105478505371097,42.87816510888375,1.0 ],
 		   
-			trajectory: './model/original/output.json',
+			trajectory: './model/small_garage/output.json',
 		   
 		}
 
 		var dataParameter = {
-			n: 1.3,
+			n: 3,
+			depthMax: 150,
 		}
 		let chunks;
 
